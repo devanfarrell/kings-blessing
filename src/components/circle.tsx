@@ -1,39 +1,33 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-
-function accessNestedArray(
-  nestedArray: Array<any>,
-  keyChain: Array<number>
-): any {
-  return keyChain.reduce((arr: any, index: number) => {
-    return arr && arr.length > index ? arr[index] : null;
-  }, nestedArray);
-}
+import { Selection } from "redux/slices/kingsBlessing/selection";
+import { accessNestedArray } from "utility";
 
 export default function Circle(props) {
-  const { style, turn, team } = props;
+  const { style, turn, team, data } = props;
   let accumulativePercent = 0;
   return (
     <svg style={style} viewBox="-103 -103 206 206">
       <g transform="rotate(-90)">
         {props.children.map((child, i) => {
-          const { access, data, onClick = null, percent } = child.props;
+          const { access, onClick = null, percent } = child.props;
           let calculatedColor = "white";
-
-          // I don't remember why I wrote this...
           if (access) {
-            const update = accessNestedArray(data.update, access);
-            const active = accessNestedArray(data.active, access);
-            calculatedColor = update ? "hotpink" : calculatedColor;
-            calculatedColor = active ? "red" : calculatedColor;
+            const state = accessNestedArray(data, access);
+            calculatedColor =
+              state === Selection.selected ? "hotpink" : calculatedColor;
+            calculatedColor =
+              state === Selection.finalized ? team : calculatedColor;
           }
 
           const color = onClick ? calculatedColor : "grey";
           const pathString = coordinateString(percent, accumulativePercent);
           accumulativePercent += percent;
+
+          const callback = () => (onClick ? onClick(access) : null);
           return (
             <path
-              onClick={onClick}
+              onClick={callback}
               css={sliceStyle(!!onClick && turn === team)}
               key={i}
               d={pathString}

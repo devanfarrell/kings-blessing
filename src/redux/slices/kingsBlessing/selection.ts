@@ -9,8 +9,6 @@ export interface Progress {
   wool: Array<Array<boolean>>;
   king: Array<Array<boolean>>;
   queen: Array<Array<boolean>>;
-  color: string;
-  updates: any;
 }
 
 export enum Selection {
@@ -32,7 +30,7 @@ const presentationOrder = [
 const initializationUtil = (circleCount: number, fraction: number) =>
   Array(circleCount).fill(Array(fraction).fill(Selection.unselected));
 
-export const progressInitialState = (color: string): Progress => ({
+export const progressInitialState: Progress = {
   presentationOrder,
   cows: initializationUtil(3, 3),
   wheat: initializationUtil(3, 4),
@@ -65,10 +63,8 @@ export const progressInitialState = (color: string): Progress => ({
     ],
     [
       Selection.finalized,
-      ...Array(10).fill(Selection.finalized),
+      ...Array(10).fill(Selection.unselected),
       Selection.finalized
     ]
-  ],
-  color,
-  updates: {}
-});
+  ]
+};
