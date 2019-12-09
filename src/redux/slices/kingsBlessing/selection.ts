@@ -13,6 +13,12 @@ export interface Progress {
   updates: any;
 }
 
+export enum Selection {
+  unselected,
+  selected,
+  finalized
+}
+
 const presentationOrder = [
   "cows",
   "wheat",
@@ -24,7 +30,7 @@ const presentationOrder = [
 ];
 
 const initializationUtil = (circleCount: number, fraction: number) =>
-  Array(circleCount).fill(Array(fraction).fill(false));
+  Array(circleCount).fill(Array(fraction).fill(Selection.unselected));
 
 export const progressInitialState = (color: string): Progress => ({
   presentationOrder,
@@ -36,14 +42,32 @@ export const progressInitialState = (color: string): Progress => ({
   water: initializationUtil(2, 10),
   wool: initializationUtil(3, 12),
   king: [
-    [false, true],
-    [false, false, true],
-    [...Array(3).fill(false), true, true, ...Array(3).fill(false)]
+    [Selection.unselected, Selection.finalized],
+    [Selection.unselected, Selection.unselected, Selection.finalized],
+    [
+      ...Array(3).fill(Selection.finalized),
+      ...Array(2).fill(Selection.unselected),
+      ...Array(3).fill(Selection.finalized)
+    ]
   ],
   queen: [
-    [false, true, false, true, false, true],
-    [...Array(3).fill(false), ...Array(7).fill(true)],
-    [true, ...Array(10).fill(false), true]
+    [
+      Selection.unselected,
+      Selection.finalized,
+      Selection.unselected,
+      Selection.finalized,
+      Selection.unselected,
+      Selection.finalized
+    ],
+    [
+      ...Array(3).fill(Selection.unselected),
+      ...Array(7).fill(Selection.finalized)
+    ],
+    [
+      Selection.finalized,
+      ...Array(10).fill(Selection.finalized),
+      Selection.finalized
+    ]
   ],
   color,
   updates: {}

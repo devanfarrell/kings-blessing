@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/core";
 import KingsCircles from "./kingsCircles";
 import QueensCircles from "./queensCircles";
 
-export default function Edge({ kingData, queenData }) {
+export default function Edge({ kingData, queenData, team }) {
   return (
     <div css={edges}>
       <div css={threeParts}>
@@ -14,7 +14,7 @@ export default function Edge({ kingData, queenData }) {
           </div>
         </div>
         <div css={twoThirds}>
-          <KingsCircles kingData={kingData} />
+          <KingsCircles team={team} kingData={kingData} />
         </div>
       </div>
       <div css={onePart}>
@@ -28,7 +28,7 @@ export default function Edge({ kingData, queenData }) {
           </div>
         </div>
         <div css={twoThirds}>
-          <QueensCircles queenData={queenData} />
+          <QueensCircles team={team} queenData={queenData} />
         </div>
       </div>
     </div>
@@ -41,13 +41,6 @@ const oneThird = css`
 
 const twoThirds = css`
   width: 200%;
-`;
-
-const circleWrapper = css`
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  height: 100%;
 `;
 
 const partTitle = css`

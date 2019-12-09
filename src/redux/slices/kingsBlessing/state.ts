@@ -24,7 +24,7 @@ export const switchPlayers = stateSlice.createAction(
 
 export const stateSelector = stateSlice.selectState();
 
-export const turnSelector: any = createSelector(
+export const selectTurn: any = createSelector(
   [stateSelector],
   (state: Interface) => {
     return state.turn ? "blue" : "red";

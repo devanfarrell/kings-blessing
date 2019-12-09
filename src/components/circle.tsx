@@ -1,26 +1,31 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 
-function accessNestedArray(nestedArray: any, keyChain: Array<number>): any {
+function accessNestedArray(
+  nestedArray: Array<any>,
+  keyChain: Array<number>
+): any {
   return keyChain.reduce((arr: any, index: number) => {
     return arr && arr.length > index ? arr[index] : null;
   }, nestedArray);
 }
 
 export default function Circle(props) {
-  const { style } = props;
+  const { style, turn, team } = props;
   let accumulativePercent = 0;
   return (
     <svg style={style} viewBox="-103 -103 206 206">
       <g transform="rotate(-90)">
         {props.children.map((child, i) => {
           const { access, data, onClick = null, percent } = child.props;
-
           let calculatedColor = "white";
+
+          // I don't remember why I wrote this...
           if (access) {
-            const update = accessNestedArray(access, data.update);
-            const active = accessNestedArray(access, data.active);
-            console.debug(access, update, active);
+            const update = accessNestedArray(data.update, access);
+            const active = accessNestedArray(data.active, access);
+            calculatedColor = update ? "hotpink" : calculatedColor;
+            calculatedColor = active ? "red" : calculatedColor;
           }
 
           const color = onClick ? calculatedColor : "grey";
@@ -29,7 +34,7 @@ export default function Circle(props) {
           return (
             <path
               onClick={onClick}
-              css={sliceStyle(!!onClick)}
+              css={sliceStyle(!!onClick && turn === team)}
               key={i}
               d={pathString}
               fill={color}

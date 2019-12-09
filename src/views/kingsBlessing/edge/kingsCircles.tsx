@@ -1,47 +1,62 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import Circle, { Slice } from "../../../components/circle";
+import Circle, { Slice } from "components/circle";
+import { useSelector } from "react-redux";
+import { selectTurn } from "redux/slices/kingsBlessing/state";
 
-const logger = () => {
-  console.debug("clickity clack");
-};
+const KingsCircles = ({ kingData, team }) => {
+  const turn = useSelector(selectTurn);
 
-function accessNestedArray(nestedArray: any, keyChain: Array<number>): any {
-  return keyChain.reduce((arr: any, index: number) => {
-    return arr && arr.length > index ? arr[index] : null;
-  }, nestedArray);
-}
-
-const KingsCircles = ({ kingData }) => {
-  console.debug(kingData);
-  const value1 = accessNestedArray(kingData.active, [0, 1]);
-  console.debug("doop", value1);
+  const logger = () => {
+    if (team === turn) {
+      console.debug("clickity clack");
+    }
+  };
   return (
     <div css={circleWrapper}>
-      <Circle style={{ height: "90px", width: "90px" }}>
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice
           data={kingData}
-          access={[0, 1]}
+          access={[0, 0]}
           onClick={logger}
           percent={1 / 2}
-          color="white"
         />
-        <Slice percent={1 / 2} color="grey" />
+        <Slice percent={1 / 2} />
       </Circle>
-      <Circle style={{ height: "90px", width: "90px" }}>
-        <Slice onClick={logger} percent={1 / 3} color="white" />
-        <Slice onClick={logger} percent={1 / 3} color="white" />
-        <Slice percent={1 / 3} color="grey" />
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+        <Slice
+          data={kingData}
+          access={[1, 0]}
+          onClick={logger}
+          percent={1 / 3}
+        />
+        <Slice
+          data={kingData}
+          access={[1, 1]}
+          onClick={logger}
+          percent={1 / 3}
+        />
+        <Slice percent={1 / 3} />
       </Circle>
-      <Circle style={{ height: "90px", width: "90px" }}>
-        <Slice percent={1 / 8} color="grey" />
-        <Slice percent={1 / 8} color="grey" />
-        <Slice percent={1 / 8} color="grey" />
-        <Slice onClick={logger} percent={1 / 8} color="white" />
-        <Slice onClick={logger} percent={1 / 8} color="white" />
-        <Slice percent={1 / 8} color="grey" />
-        <Slice percent={1 / 8} color="grey" />
-        <Slice percent={1 / 8} color="grey" />
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} />
+        <Slice
+          onClick={logger}
+          percent={1 / 8}
+          data={kingData}
+          access={[2, 3]}
+        />
+        <Slice
+          onClick={logger}
+          percent={1 / 8}
+          data={kingData}
+          access={[2, 4]}
+        />
+        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} />
       </Circle>
     </div>
   );

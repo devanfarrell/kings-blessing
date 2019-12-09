@@ -3,19 +3,20 @@ import { css, jsx } from "@emotion/core";
 import { useSelector } from "react-redux";
 import Center from "./center";
 import Edge from "./edge";
-import { turnSelector } from "../../redux/slices/kingsBlessing/state";
+import { selectTurn } from "redux/slices/kingsBlessing/state";
 
 import {
   redKingSelector,
   redQueenSelector
-} from "../../redux/slices/kingsBlessing/red";
+} from "redux/slices/kingsBlessing/red";
 import {
   blueKingSelector,
   blueQueenSelector
-} from "../../redux/slices/kingsBlessing/blue";
+} from "redux/slices/kingsBlessing/blue";
 
 const KingsBlessing = () => {
-  const turn = useSelector(turnSelector);
+  const turn = useSelector(selectTurn);
+  console.debug(turn);
   // red
   const redKingData = useSelector(redKingSelector);
   const redQueenData = useSelector(redQueenSelector);
@@ -24,7 +25,7 @@ const KingsBlessing = () => {
   const blueQueenData = useSelector(blueQueenSelector);
   return (
     <div css={wrapper}>
-      <Edge kingData={redKingData} queenData={redQueenData} />
+      <Edge team="red" kingData={redKingData} queenData={redQueenData} />
       <div css={playArea}>
         <div css={playBlock}>3 * 3/3</div>
         <div css={playBlock}>3 * 4/4</div>
@@ -44,7 +45,7 @@ const KingsBlessing = () => {
         <div css={playBlock}>2 * 10/10</div>
         <div css={playBlock}>3 * 12/12</div>
       </div>
-      <Edge kingData={blueKingData} queenData={blueQueenData} />
+      <Edge team="blue" kingData={blueKingData} queenData={blueQueenData} />
     </div>
   );
 };

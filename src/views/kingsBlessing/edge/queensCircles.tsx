@@ -1,36 +1,41 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import Circle, { Slice } from "../../../components/circle";
+import Circle, { Slice } from "components/circle";
+import { useSelector } from "react-redux";
+import { selectTurn } from "redux/slices/kingsBlessing/state";
 
-const logger = () => {
-  console.debug("clickity clack");
-};
+const QueensCircles = ({ queenData, team }) => {
+  const turn = useSelector(selectTurn);
 
-const QueensCircles = ({ queenData }) => {
+  const logger = () => {
+    if (team === turn) {
+      console.debug("clickity clack pow");
+    }
+  };
   return (
     <div css={circleWrapper}>
-      <Circle style={{ height: "90px", width: "90px" }}>
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice onClick={logger} percent={1 / 6} color="white" />
-        <Slice percent={1 / 6} color="grey" />
+        <Slice percent={1 / 6} />
         <Slice onClick={logger} percent={1 / 6} color="white" />
-        <Slice percent={1 / 6} color="grey" />
+        <Slice percent={1 / 6} />
         <Slice onClick={logger} percent={1 / 6} color="white" />
-        <Slice percent={1 / 6} color="grey" />
+        <Slice percent={1 / 6} />
       </Circle>
-      <Circle style={{ height: "90px", width: "90px" }}>
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice onClick={logger} percent={1 / 10} color="white" />
         <Slice onClick={logger} percent={1 / 10} color="white" />
         <Slice onClick={logger} percent={1 / 10} color="white" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
-        <Slice percent={1 / 10} color="grey" />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} />
       </Circle>
-      <Circle style={{ height: "90px", width: "90px" }}>
-        <Slice percent={1 / 12} color="grey" />
+      <Circle turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+        <Slice percent={1 / 12} />
         <Slice onClick={logger} percent={1 / 12} color="white" />
         <Slice onClick={logger} percent={1 / 12} color="white" />
         <Slice onClick={logger} percent={1 / 12} color="white" />
@@ -41,7 +46,7 @@ const QueensCircles = ({ queenData }) => {
         <Slice onClick={logger} percent={1 / 12} color="white" />
         <Slice onClick={logger} percent={1 / 12} color="white" />
         <Slice onClick={logger} percent={1 / 12} color="white" />
-        <Slice percent={1 / 12} color="grey" />
+        <Slice percent={1 / 12} />
       </Circle>
     </div>
   );
