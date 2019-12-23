@@ -1,17 +1,22 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
 import { ReactComponent as Crown } from "./crown.svg";
+import { useDispatch } from "react-redux";
+import { switchPlayers, rollDice } from "redux/slices/kingsBlessing/state";
+import { submitRedAnswer } from "redux/slices/kingsBlessing/red";
 
 const Center = () => {
+  const dispatch = useDispatch();
+
   return (
     <div css={centerStyle}>
-      <div css={crownSection}>
+      <div onClick={() => dispatch(switchPlayers())} css={crownSection}>
         <Crown css={crownStyle} />
       </div>
-      <div css={crownSection}>
+      <div onClick={() => dispatch(rollDice())} css={crownSection}>
         <Crown css={crownStyle} />
       </div>
-      <div css={crownSection}>
+      <div onClick={() => dispatch(submitRedAnswer())} css={crownSection}>
         <Crown css={crownStyle} />
       </div>
       <div css={crownSection}>

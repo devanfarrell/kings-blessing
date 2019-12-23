@@ -41,3 +41,16 @@ export const updateBlue = blueSlice.createAction(
     return draft;
   }
 );
+
+export const selectBlueField = createSelector(
+  [blueSelector],
+  ({ cows, wheat, lumber, pigs, fruit, water, wool }) => ({
+    cows,
+    wheat,
+    lumber,
+    pigs,
+    fruit,
+    water,
+    wool
+  })
+);

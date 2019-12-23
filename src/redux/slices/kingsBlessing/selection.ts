@@ -1,14 +1,14 @@
 export interface Progress {
   presentationOrder: Array<string>;
-  cows: Array<Array<boolean>>;
-  wheat: Array<Array<boolean>>;
-  lumber: Array<Array<boolean>>;
-  pigs: Array<Array<boolean>>;
-  fruit: Array<Array<boolean>>;
-  water: Array<Array<boolean>>;
-  wool: Array<Array<boolean>>;
-  king: Array<Array<boolean>>;
-  queen: Array<Array<boolean>>;
+  cows: Array<Array<Selection>>;
+  wheat: Array<Array<Selection>>;
+  lumber: Array<Array<Selection>>;
+  pigs: Array<Array<Selection>>;
+  fruit: Array<Array<Selection>>;
+  water: Array<Array<Selection>>;
+  wool: Array<Array<Selection>>;
+  king: Array<Array<Selection>>;
+  queen: Array<Array<Selection>>;
 }
 
 export enum Selection {
@@ -68,3 +68,11 @@ export const progressInitialState: Progress = {
     ]
   ]
 };
+
+export const selectionReduce = (accumulator: Selection, currentValue: number) =>
+  currentValue === Selection.selected ? accumulator + 1 : accumulator;
+
+export const createFraction = (denominator: number) => ({
+  numerator: 0,
+  denominator
+});
