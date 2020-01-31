@@ -1,10 +1,10 @@
 import { createSlice, createSelector } from "redux-dogma";
 import { cloneDeep } from "lodash";
 
-type GoldDie = 1 | 2 | 3 | 4 | 5 | 6 | null;
-type PurpleDie = 1 | 2 | 4 | 8 | 10 | 12 | null;
+export type GoldDie = 1 | 2 | 3 | 4 | 5 | 6 | null;
+export type PurpleDie = 1 | 2 | 4 | 8 | 10 | 12 | null;
 
-interface Interface {
+interface ReducerStructure {
   turn: number;
   numerator: number;
   denominator: number;
@@ -14,7 +14,7 @@ interface Interface {
   haveRerolledPurpleDie: boolean;
 }
 
-const initialState: Interface = {
+const initialState: ReducerStructure = {
   turn: 0,
   numerator: 0,
   denominator: 0,
@@ -36,57 +36,53 @@ function rollGoldDie(): GoldDie {
   return goldDie[randomIndex];
 }
 
-export const stateSlice = createSlice("state", cloneDeep(initialState));
+export const stateSlice = createSlice<ReducerStructure>(
+  "state",
+  cloneDeep(initialState)
+);
 
 /**
  * Actions
  */
 
-export const switchPlayers = stateSlice.createAction(
-  "switchTurns",
-  (draft: Interface) => {
-    const nextTurn = (draft.turn + 1) % 2;
-    draft = cloneDeep(initialState);
-    draft.turn = nextTurn;
-    return draft;
-  }
-);
+export const switchPlayers = stateSlice.createAction("switchTurns", draft => {
+  const nextTurn = (draft.turn + 1) % 2;
+  Object.keys(draft).forEach(key => {
+    draft[key] = initialState[key];
+  });
+  draft.turn = nextTurn;
+  return;
+});
 
-export const rollDice = stateSlice.createAction(
-  "rollDice",
-  (draft: Interface) => {
-    draft.goldDie = rollGoldDie();
-    draft.purpleDie = rollPurpleDie();
-    if (draft.goldDie > draft.purpleDie) {
-      draft.numerator = draft.purpleDie;
-      draft.denominator = draft.goldDie;
-    } else {
-      draft.numerator = draft.goldDie;
-      draft.denominator = draft.purpleDie;
-    }
-    return draft;
+export const rollDice = stateSlice.createAction("rollDice", draft => {
+  draft.goldDie = rollGoldDie();
+  draft.purpleDie = rollPurpleDie();
+  if (draft.goldDie > draft.purpleDie) {
+    draft.numerator = draft.purpleDie;
+    draft.denominator = draft.goldDie;
+  } else {
+    draft.numerator = draft.goldDie;
+    draft.denominator = draft.purpleDie;
   }
-);
+  return;
+});
 
-export const rerollGoldDie = stateSlice.createAction(
-  "rerollGoldDie",
-  (draft: Interface) => {
-    draft.haveRerolledGoldDie = true;
-    draft.goldDie = rollGoldDie();
-    if (draft.goldDie > draft.purpleDie) {
-      draft.numerator = draft.purpleDie;
-      draft.denominator = draft.goldDie;
-    } else {
-      draft.numerator = draft.goldDie;
-      draft.denominator = draft.purpleDie;
-    }
-    return draft;
+export const rerollGoldDie = stateSlice.createAction("rerollGoldDie", draft => {
+  draft.haveRerolledGoldDie = true;
+  draft.goldDie = rollGoldDie();
+  if (draft.goldDie > draft.purpleDie) {
+    draft.numerator = draft.purpleDie;
+    draft.denominator = draft.goldDie;
+  } else {
+    draft.numerator = draft.goldDie;
+    draft.denominator = draft.purpleDie;
   }
-);
+  return;
+});
 
 export const rerollPurpleDie = stateSlice.createAction(
   "rerollPurpleDie",
-  (draft: Interface) => {
+  draft => {
     draft.haveRerolledPurpleDie = true;
     draft.purpleDie = rollPurpleDie();
     if (draft.goldDie > draft.purpleDie) {
@@ -96,7 +92,7 @@ export const rerollPurpleDie = stateSlice.createAction(
       draft.numerator = draft.goldDie;
       draft.denominator = draft.purpleDie;
     }
-    return draft;
+    return;
   }
 );
 
@@ -106,9 +102,23 @@ export const rerollPurpleDie = stateSlice.createAction(
 
 export const selectState = stateSlice.selectState();
 
-export const selectTurn: any = createSelector(
+export const selectTurn = createSelector(
   [selectState],
-  (state: Interface) => {
+  (state: ReducerStructure): "blue" | "red" => {
     return state.turn ? "blue" : "red";
+  }
+);
+
+export const selectGoldDie = createSelector(
+  [selectState],
+  (state: ReducerStructure): GoldDie => {
+    return state.goldDie;
+  }
+);
+
+export const selectPurpleDie = createSelector(
+  [selectState],
+  (state: ReducerStructure): PurpleDie => {
+    return state.purpleDie;
   }
 );

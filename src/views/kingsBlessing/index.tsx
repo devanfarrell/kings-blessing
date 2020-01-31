@@ -12,10 +12,11 @@ import {
   selectPresentationOrder
 } from "redux/slices/kingsBlessing/red";
 import {
-  blueKingSelector,
-  blueQueenSelector,
+  selectBlueKing,
+  selectBlueQueen,
   selectBlueField
 } from "redux/slices/kingsBlessing/blue";
+import Dice from "./dice";
 
 const KingsBlessing = () => {
   // red
@@ -24,8 +25,8 @@ const KingsBlessing = () => {
   const presentationOrder = useSelector(selectPresentationOrder);
   const redField = useSelector(selectRedField);
   // blue
-  const blueKingData = useSelector(blueKingSelector);
-  const blueQueenData = useSelector(blueQueenSelector);
+  const blueKingData = useSelector(selectBlueKing);
+  const blueQueenData = useSelector(selectBlueQueen);
   const blueField = useSelector(selectBlueField);
   return (
     <div css={wrapper}>
@@ -42,6 +43,7 @@ const KingsBlessing = () => {
         team="blue"
       />
       <Edge team="blue" kingData={blueKingData} queenData={blueQueenData} />
+      <Dice />
     </div>
   );
 };

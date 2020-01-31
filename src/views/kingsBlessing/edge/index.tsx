@@ -10,7 +10,7 @@ export default function Edge({ kingData, queenData, team }) {
         <div css={oneThird}>
           <div css={partTitle}>King's Blessing</div>
           <div css={partDescription}>
-            When Completed, you may re-roll the 1, 2, 3, 4, 5, 6 die
+            When Completed, you may re-roll the gold die
           </div>
         </div>
         <div css={twoThirds}>
@@ -24,7 +24,7 @@ export default function Edge({ kingData, queenData, team }) {
         <div css={oneThird}>
           <div css={partTitle}>Queen's Blessing</div>
           <div css={partDescription}>
-            When Completed, you may re-roll the 1, 2, 4, 8, 10, 12 die
+            When Completed, you may re-roll the purple die
           </div>
         </div>
         <div css={twoThirds}>

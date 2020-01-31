@@ -1,14 +1,16 @@
+export type Field = Array<Array<Selection>>;
+
 export interface Progress {
   presentationOrder: Array<string>;
-  cows: Array<Array<Selection>>;
-  wheat: Array<Array<Selection>>;
-  lumber: Array<Array<Selection>>;
-  pigs: Array<Array<Selection>>;
-  fruit: Array<Array<Selection>>;
-  water: Array<Array<Selection>>;
-  wool: Array<Array<Selection>>;
-  king: Array<Array<Selection>>;
-  queen: Array<Array<Selection>>;
+  cows: Field;
+  wheat: Field;
+  lumber: Field;
+  pigs: Field;
+  fruit: Field;
+  water: Field;
+  wool: Field;
+  king: Field;
+  queen: Field;
 }
 
 export enum Selection {

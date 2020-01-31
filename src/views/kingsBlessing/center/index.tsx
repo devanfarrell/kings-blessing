@@ -4,6 +4,7 @@ import { ReactComponent as Crown } from "./crown.svg";
 import { useDispatch } from "react-redux";
 import { switchPlayers, rollDice } from "redux/slices/kingsBlessing/state";
 import { submitRedAnswer } from "redux/slices/kingsBlessing/red";
+import { submitBlueAnswer } from "redux/slices/kingsBlessing/blue";
 
 const Center = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const Center = () => {
       <div onClick={() => dispatch(submitRedAnswer())} css={crownSection}>
         <Crown css={crownStyle} />
       </div>
-      <div css={crownSection}>
+      <div onClick={() => dispatch(submitBlueAnswer())} css={crownSection}>
         <Crown css={crownStyle} />
       </div>
       <div css={crownSection}>
