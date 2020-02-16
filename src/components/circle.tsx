@@ -4,8 +4,7 @@ import { Selection } from "redux/slices/kingsBlessing/selection";
 import { accessNestedArray } from "utility";
 import { colors } from "theme";
 
-export default function Circle(props) {
-  const { style, turn, team, data } = props;
+export default function Circle({ style, turn, player, data, ...props }) {
   let accumulativePercent = 0;
   return (
     <svg style={style} viewBox="-103 -103 206 206">
@@ -13,8 +12,8 @@ export default function Circle(props) {
         {props.children.map((child, i) => {
           const { access, onClick = null, percent } = child.props;
 
-          const finalizedColor = team === "red" ? colors.red : colors.blue;
-          const selectedColor = team === "red" ? colors.lightRed : colors.lightBlue;
+          const finalizedColor = player === "red" ? colors.red : colors.blue;
+          const selectedColor = player === "red" ? colors.lightRed : colors.lightBlue;
           let calculatedColor = "white";
 
           if (access) {
@@ -31,7 +30,7 @@ export default function Circle(props) {
           return (
             <path
               onClick={callback}
-              css={sliceStyle(!!onClick && turn === team)}
+              css={sliceStyle(!!onClick && turn === player)}
               key={i}
               d={pathString}
               fill={color}

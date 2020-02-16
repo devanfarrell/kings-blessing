@@ -36,7 +36,7 @@ const QueensCircles = ({ queenData, team }) => {
 
   return (
     <div css={circleWrapper}>
-      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+      <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[0, 0]} onClick={circleCallback} percent={1 / 6} />
         <Slice percent={1 / 6} />
         <Slice access={[0, 2]} onClick={circleCallback} percent={1 / 6} />
@@ -44,7 +44,7 @@ const QueensCircles = ({ queenData, team }) => {
         <Slice access={[0, 4]} onClick={circleCallback} percent={1 / 6} />
         <Slice percent={1 / 6} />
       </Circle>
-      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+      <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[1, 0]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 1]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 2]} onClick={circleCallback} percent={1 / 10} />
@@ -56,7 +56,7 @@ const QueensCircles = ({ queenData, team }) => {
         <Slice percent={1 / 10} />
         <Slice percent={1 / 10} />
       </Circle>
-      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
+      <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice percent={1 / 12} />
         <Slice access={[2, 1]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 2]} onClick={circleCallback} percent={1 / 12} />

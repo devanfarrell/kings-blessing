@@ -11,7 +11,7 @@ export default function Field({ player, field }: { player: "red" | "blue"; field
     <div css={playBlock}>
       {fieldData.map((circleData, i) => {
         return (
-          <Circle key={i} data={fieldData} turn={turn} team={player} style={{ height: "90px", width: "90px" }}>
+          <Circle key={i} data={fieldData} turn={turn} player={player} style={{ height: "90px", width: "90px" }}>
             {circleData.map((value, j) => {
               return (
                 <Slice

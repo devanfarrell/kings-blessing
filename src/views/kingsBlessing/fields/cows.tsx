@@ -9,7 +9,7 @@ export default function({ player }: { player: "red" | "blue" }) {
 
   return (
     <div css={playBlock}>
-      <Circle data={fieldData} turn={turn} team={player} style={{ height: "90px", width: "90px" }}>
+      <Circle data={fieldData} turn={turn} player={player} style={{ height: "90px", width: "90px" }}>
         {fieldData[0].map((value, j) => {
           return (
             <Slice
@@ -21,7 +21,7 @@ export default function({ player }: { player: "red" | "blue" }) {
           );
         })}
       </Circle>
-      <Circle data={fieldData} turn={turn} team={player} style={{ height: "90px", width: "90px" }}>
+      <Circle data={fieldData} turn={turn} player={player} style={{ height: "90px", width: "90px" }}>
         {fieldData[1].map((value, j) => {
           return (
             <Slice
@@ -33,7 +33,7 @@ export default function({ player }: { player: "red" | "blue" }) {
           );
         })}
       </Circle>
-      <Circle data={fieldData} turn={turn} team={player} style={{ height: "90px", width: "90px" }}>
+      <Circle data={fieldData} turn={turn} player={player} style={{ height: "90px", width: "90px" }}>
         {fieldData[2].map((value, j) => {
           return (
             <Slice
