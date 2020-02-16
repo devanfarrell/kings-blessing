@@ -2,6 +2,7 @@
 import { css, jsx } from "@emotion/core";
 import { Selection } from "redux/slices/kingsBlessing/selection";
 import { accessNestedArray } from "utility";
+import { colors } from "theme";
 
 export default function Circle(props) {
   const { style, turn, team, data } = props;
@@ -11,13 +12,15 @@ export default function Circle(props) {
       <g transform="rotate(-90)">
         {props.children.map((child, i) => {
           const { access, onClick = null, percent } = child.props;
+
+          const finalizedColor = team === "red" ? colors.red : colors.blue;
+          const selectedColor = team === "red" ? colors.lightRed : colors.lightBlue;
           let calculatedColor = "white";
+
           if (access) {
             const state = accessNestedArray(data, access);
-            calculatedColor =
-              state === Selection.selected ? "hotpink" : calculatedColor;
-            calculatedColor =
-              state === Selection.finalized ? team : calculatedColor;
+            calculatedColor = state === Selection.selected ? selectedColor : calculatedColor;
+            calculatedColor = state === Selection.finalized ? finalizedColor : calculatedColor;
           }
 
           const color = onClick ? calculatedColor : "grey";
@@ -59,11 +62,11 @@ function coordinateString(slicePercent, accumulativePercent) {
   const endRad = 2 * pi * (slicePercent + accumulativePercent);
   const start = coordinatesFromRadians(startRad);
   const end = coordinatesFromRadians(endRad);
-  return `M0,0 L${start.x},${start.y} A100,100 0 ${
-    slicePercent >= 0.5 ? 1 : 0
-  },1 ${end.x},${end.y} Z`;
+  return `M0,0 L${start.x},${start.y} A100,100 0 ${slicePercent >= 0.5 ? 1 : 0},1 ${end.x},${end.y} Z`;
 }
 
 const sliceStyle = clickable => css`
   cursor: ${clickable ? "pointer" : "not-allowed"};
+  background-color: white;
+  transition: background-color ease-in-out 2000ms;
 `;

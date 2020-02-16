@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
 import { updateRed } from "redux/slices/kingsBlessing/red";
 import { updateBlue } from "redux/slices/kingsBlessing/blue";
+import { kingsBlessingClickSound } from "audio";
 
 const QueensCircles = ({ queenData, team }) => {
   const turn = useSelector(selectTurn);
@@ -12,12 +13,13 @@ const QueensCircles = ({ queenData, team }) => {
 
   const circleCallback = access => {
     if (team === turn) {
+      kingsBlessingClickSound.play();
       if (team === "red") {
         dispatch(
           updateRed({
             section: "queen",
             circleIndex: access[0],
-            sliceIndex: access[1]
+            sliceIndex: access[1],
           })
         );
       } else if (team === "blue") {
@@ -25,7 +27,7 @@ const QueensCircles = ({ queenData, team }) => {
           updateBlue({
             section: "queen",
             circleIndex: access[0],
-            sliceIndex: access[1]
+            sliceIndex: access[1],
           })
         );
       }
@@ -34,12 +36,7 @@ const QueensCircles = ({ queenData, team }) => {
 
   return (
     <div css={circleWrapper}>
-      <Circle
-        data={queenData}
-        turn={turn}
-        team={team}
-        style={{ height: "90px", width: "90px" }}
-      >
+      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[0, 0]} onClick={circleCallback} percent={1 / 6} />
         <Slice percent={1 / 6} />
         <Slice access={[0, 2]} onClick={circleCallback} percent={1 / 6} />
@@ -47,12 +44,7 @@ const QueensCircles = ({ queenData, team }) => {
         <Slice access={[0, 4]} onClick={circleCallback} percent={1 / 6} />
         <Slice percent={1 / 6} />
       </Circle>
-      <Circle
-        data={queenData}
-        turn={turn}
-        team={team}
-        style={{ height: "90px", width: "90px" }}
-      >
+      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[1, 0]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 1]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 2]} onClick={circleCallback} percent={1 / 10} />
@@ -64,12 +56,7 @@ const QueensCircles = ({ queenData, team }) => {
         <Slice percent={1 / 10} />
         <Slice percent={1 / 10} />
       </Circle>
-      <Circle
-        data={queenData}
-        turn={turn}
-        team={team}
-        style={{ height: "90px", width: "90px" }}
-      >
+      <Circle data={queenData} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
         <Slice percent={1 / 12} />
         <Slice access={[2, 1]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 2]} onClick={circleCallback} percent={1 / 12} />

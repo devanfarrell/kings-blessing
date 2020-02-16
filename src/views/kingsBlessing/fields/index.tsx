@@ -5,18 +5,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
 import { updateRed } from "redux/slices/kingsBlessing/red";
 import { updateBlue } from "redux/slices/kingsBlessing/blue";
+import { kingsBlessingClickSound } from "audio";
 
 const Fields = ({ team, data, presentationOrder }) => {
   const turn = useSelector(selectTurn);
   const dispatch = useDispatch();
   const circleCallback = field => access => {
     if (team === turn) {
+      kingsBlessingClickSound.play();
       if (team === "red") {
         dispatch(
           updateRed({
             section: field,
             circleIndex: access[0],
-            sliceIndex: access[1]
+            sliceIndex: access[1],
           })
         );
       } else if (team === "blue") {
@@ -24,7 +26,7 @@ const Fields = ({ team, data, presentationOrder }) => {
           updateBlue({
             section: field,
             circleIndex: access[0],
-            sliceIndex: access[1]
+            sliceIndex: access[1],
           })
         );
       }
@@ -38,13 +40,7 @@ const Fields = ({ team, data, presentationOrder }) => {
           <div key={field} css={playBlock}>
             {data[field].map((circleData, i) => {
               return (
-                <Circle
-                  key={i}
-                  data={data[field]}
-                  turn={turn}
-                  team={team}
-                  style={{ height: "90px", width: "90px" }}
-                >
+                <Circle key={i} data={data[field]} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
                   {circleData.map((value, j) => {
                     return (
                       <Slice
@@ -69,7 +65,7 @@ const playArea = css`
   display: flex;
   flex-direction: row;
   height: 30%;
-  background-color: yellow;
+  background-color: rgb(147, 167, 84);
 `;
 
 const playBlock = css`
@@ -78,6 +74,9 @@ const playBlock = css`
   border: solid 1px black;
   width: 100%;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 5px 0;
 `;
 
 export default Fields;

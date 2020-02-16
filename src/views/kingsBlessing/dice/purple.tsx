@@ -56,5 +56,5 @@ const cssStyle = {
     color: transparent;
     text-shadow: -1px -1px 2px hsla(262, 50%, 24%, 0.8);
     line-height: 0px;
-  `
+  `,
 };

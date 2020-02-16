@@ -1,13 +1,9 @@
 import { createSlice, createSelector, effects } from "redux-dogma";
-import {
-  Progress,
-  Field,
-  progressInitialState,
-  Selection,
-  selectionReduce
-} from "./selection";
+import { Progress, Field, progressInitialState, Selection, selectionReduce } from "./selection";
 import { selectState, switchPlayers } from "./state";
 import { fraction, add, compare, number } from "mathjs";
+import { toast } from "react-toastify";
+import { kingsBlessingFailSound, kingsBlessingSuccessSound } from "audio";
 
 export const blueSlice = createSlice<Progress>("blue", progressInitialState);
 
@@ -42,67 +38,44 @@ const finalizeAnswers = blueSlice.createAction("finalizeAnswers", draft => {
   });
 });
 
-const clearSelectedAnswers = blueSlice.createAction(
-  "clearSelectedAnswers",
-  draft => {
-    [...draft.presentationOrder, "king", "queen"].forEach(fieldKey => {
-      draft[fieldKey].forEach(circle =>
-        circle.forEach((slice, i) => {
-          if (slice === Selection.selected) {
-            circle[i] = Selection.unselected;
-          }
-        })
-      );
-    });
-  }
-);
+const clearSelectedAnswers = blueSlice.createAction("clearSelectedAnswers", draft => {
+  [...draft.presentationOrder, "king", "queen"].forEach(fieldKey => {
+    draft[fieldKey].forEach(circle =>
+      circle.forEach((slice, i) => {
+        if (slice === Selection.selected) {
+          circle[i] = Selection.unselected;
+        }
+      })
+    );
+  });
+});
 
 /**
  * Selectors
  */
 const rawSelector = blueSlice.selectState();
 
-const blueSelector: any = createSelector(
-  [rawSelector],
-  (state: Progress) => state
-);
+const blueSelector: any = createSelector([rawSelector], (state: Progress) => state);
 
-export const selectBlueKing = createSelector(
-  [blueSelector],
-  (state: Progress) => state.king
-);
+export const selectBlueKing = createSelector([blueSelector], (state: Progress) => state.king);
 
-export const selectBlueQueen: any = createSelector(
-  [blueSelector],
-  (state: Progress) => state.queen
-);
+export const selectBlueQueen: any = createSelector([blueSelector], (state: Progress) => state.queen);
 
-export const selectBlueField = createSelector(
-  [blueSelector],
-  ({ cows, wheat, lumber, pigs, fruit, water, wool }) => ({
-    cows,
-    wheat,
-    lumber,
-    pigs,
-    fruit,
-    water,
-    wool
-  })
-);
+export const selectBlueField = createSelector([blueSelector], ({ cows, wheat, lumber, pigs, fruit, water, wool }) => ({
+  cows,
+  wheat,
+  lumber,
+  pigs,
+  fruit,
+  water,
+  wool,
+}));
 
-export const selectPresentationOrder = createSelector(
-  [blueSelector],
-  (state: Progress) => state.presentationOrder
-);
+export const selectPresentationOrder = createSelector([blueSelector], (state: Progress) => state.presentationOrder);
 
 const selectDoesImplementationMatch = createSelector(
   [selectBlueField, selectBlueKing, selectBlueQueen, selectState],
-  (
-    fields: Array<Field>,
-    king: Field,
-    queen: Field,
-    { numerator, denominator }
-  ) => {
+  (fields: Array<Field>, king: Field, queen: Field, { numerator, denominator }) => {
     console.debug("say what...");
     let implementation = fraction(0, 1);
 
@@ -112,10 +85,7 @@ const selectDoesImplementationMatch = createSelector(
         localNumerator += circle.reduce(selectionReduce, 0);
       });
       if (localNumerator !== 0) {
-        implementation = add(
-          fraction(localNumerator, field[0].length),
-          implementation
-        );
+        implementation = add(fraction(localNumerator, field[0].length), implementation);
       }
     });
 
@@ -123,10 +93,7 @@ const selectDoesImplementationMatch = createSelector(
       let localNumerator = 0;
       localNumerator = circle.reduce(selectionReduce, 0);
       if (localNumerator !== 0) {
-        implementation = add(
-          fraction(localNumerator, circle.length),
-          implementation
-        );
+        implementation = add(fraction(localNumerator, circle.length), implementation);
       }
     });
 
@@ -134,28 +101,19 @@ const selectDoesImplementationMatch = createSelector(
       let localNumerator = 0;
       localNumerator = circle.reduce(selectionReduce, 0);
       if (localNumerator !== 0) {
-        implementation = add(
-          fraction(localNumerator, circle.length),
-          implementation
-        );
+        implementation = add(fraction(localNumerator, circle.length), implementation);
       }
     });
 
-    return (
-      number(compare(implementation, fraction(numerator, denominator))) === 0
-    );
+    return number(compare(implementation, fraction(numerator, denominator))) === 0;
   }
 );
 
 export const selectCanRerollDice = createSelector(
   [selectBlueQueen, selectBlueKing],
   (queenData: Field, kingData: Field): { purple: boolean; gold: boolean } => {
-    const purple = queenData.every(circle =>
-      circle.every(pieSlice => pieSlice === Selection.finalized)
-    );
-    const gold = kingData.every(circle =>
-      circle.every(pieSlice => pieSlice === Selection.finalized)
-    );
+    const purple = queenData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
+    const gold = kingData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
     return { purple, gold };
   }
 );
@@ -164,18 +122,16 @@ export const selectCanRerollDice = createSelector(
  * Sagas
  */
 
-export const submitBlueAnswer = blueSlice.createSideEffect(
-  "submitAnswerBlue",
-  function*() {
-    const implementationMatch = yield effects.select(
-      selectDoesImplementationMatch
-    );
-    console.debug("submitted blue answer", implementationMatch);
-    if (implementationMatch) {
-      yield effects.put(finalizeAnswers());
-    } else {
-      yield effects.put(clearSelectedAnswers());
-    }
-    yield effects.put(switchPlayers());
+export const submitBlueAnswer = blueSlice.createSideEffect("submitAnswerBlue", function*() {
+  const implementationMatch = yield effects.select(selectDoesImplementationMatch);
+  if (implementationMatch) {
+    toast.info("Way to go Blue!");
+    yield effects.put(finalizeAnswers());
+    kingsBlessingSuccessSound.play();
+  } else {
+    toast.info("Sorry, better luck next time.");
+    yield effects.put(clearSelectedAnswers());
+    kingsBlessingFailSound.play();
   }
-);
+  yield effects.put(switchPlayers());
+});

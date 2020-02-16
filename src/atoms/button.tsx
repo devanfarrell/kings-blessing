@@ -16,9 +16,8 @@ export function Button({ children, onClick, disabled = false }: props) {
 }
 
 const styles = (disabled: boolean) => css`
-  font-size: 1.3rem;
   box-sizing: content-box;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   padding: 0.7rem 1.7rem;
   border-radius: 3rem;
   background: linear-gradient(

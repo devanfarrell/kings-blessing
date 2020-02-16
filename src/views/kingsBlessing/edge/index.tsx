@@ -9,23 +9,19 @@ export default function Edge({ kingData, queenData, team }) {
       <div css={threeParts}>
         <div css={oneThird}>
           <div css={partTitle}>King's Blessing</div>
-          <div css={partDescription}>
-            When Completed, you may re-roll the gold die
-          </div>
+          <div css={partDescription}>When Completed, you may re-roll the gold die</div>
         </div>
         <div css={twoThirds}>
           <KingsCircles team={team} kingData={kingData} />
         </div>
       </div>
       <div css={onePart}>
-        <div css={partTitle}>Pick Rocks</div>
+        <div css={partTitle} />
       </div>
       <div css={threeParts}>
         <div css={oneThird}>
           <div css={partTitle}>Queen's Blessing</div>
-          <div css={partDescription}>
-            When Completed, you may re-roll the purple die
-          </div>
+          <div css={partDescription}>When Completed, you may re-roll the purple die</div>
         </div>
         <div css={twoThirds}>
           <QueensCircles team={team} queenData={queenData} />
@@ -63,7 +59,7 @@ const threeParts = css`
 `;
 
 const onePart = css`
-  width: 100%;
+  width: 10%;
   flex: 1 1 auto;
   background-color: #ffdb58;
 `;

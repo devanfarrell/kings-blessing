@@ -170,5 +170,5 @@ const styles = {
     border-radius: 10px;
     background-color: #939498;
     box-shadow: 0px 0px 13px #231f20 inset;
-  `
+  `,
 };
