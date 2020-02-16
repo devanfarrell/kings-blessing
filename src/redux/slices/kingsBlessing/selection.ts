@@ -1,3 +1,5 @@
+export type FieldType = "cows" | "wheat" | "lumber" | "pigs" | "fruit" | "water" | "wool";
+
 export type Field = Array<Array<Selection>>;
 
 export interface Progress {
@@ -16,18 +18,10 @@ export interface Progress {
 export enum Selection {
   unselected,
   selected,
-  finalized
+  finalized,
 }
 
-const presentationOrder = [
-  "cows",
-  "wheat",
-  "lumber",
-  "pigs",
-  "fruit",
-  "water",
-  "wool"
-];
+const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
 
 const initializationUtil = (circleCount: number, fraction: number) =>
   Array(circleCount).fill(Array(fraction).fill(Selection.unselected));
@@ -47,8 +41,8 @@ export const progressInitialState: Progress = {
     [
       ...Array(3).fill(Selection.finalized),
       ...Array(2).fill(Selection.unselected),
-      ...Array(3).fill(Selection.finalized)
-    ]
+      ...Array(3).fill(Selection.finalized),
+    ],
   ],
   queen: [
     [
@@ -57,18 +51,11 @@ export const progressInitialState: Progress = {
       Selection.unselected,
       Selection.finalized,
       Selection.unselected,
-      Selection.finalized
-    ],
-    [
-      ...Array(3).fill(Selection.unselected),
-      ...Array(7).fill(Selection.finalized)
-    ],
-    [
       Selection.finalized,
-      ...Array(10).fill(Selection.unselected),
-      Selection.finalized
-    ]
-  ]
+    ],
+    [...Array(3).fill(Selection.unselected), ...Array(7).fill(Selection.finalized)],
+    [Selection.finalized, ...Array(10).fill(Selection.unselected), Selection.finalized],
+  ],
 };
 
 export const selectionReduce = (accumulator: Selection, currentValue: number) =>
@@ -76,5 +63,5 @@ export const selectionReduce = (accumulator: Selection, currentValue: number) =>
 
 export const createFraction = (denominator: number) => ({
   numerator: 0,
-  denominator
+  denominator,
 });

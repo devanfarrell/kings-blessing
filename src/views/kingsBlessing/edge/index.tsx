@@ -2,8 +2,11 @@
 import { css, jsx } from "@emotion/core";
 import KingsCircles from "./kingsCircles";
 import QueensCircles from "./queensCircles";
+import { useFieldData } from "../hooks";
 
-export default function Edge({ kingData, queenData, team }) {
+export default function Edge({ player }: { player: "red" | "blue" }) {
+  const { kingData, queenData } = useFieldData(player);
+
   return (
     <div css={edges}>
       <div css={threeParts}>
@@ -12,7 +15,7 @@ export default function Edge({ kingData, queenData, team }) {
           <div css={partDescription}>When Completed, you may re-roll the gold die</div>
         </div>
         <div css={twoThirds}>
-          <KingsCircles team={team} kingData={kingData} />
+          <KingsCircles team={player} kingData={kingData} />
         </div>
       </div>
       <div css={onePart}>
@@ -24,7 +27,7 @@ export default function Edge({ kingData, queenData, team }) {
           <div css={partDescription}>When Completed, you may re-roll the purple die</div>
         </div>
         <div css={twoThirds}>
-          <QueensCircles team={team} queenData={queenData} />
+          <QueensCircles team={player} queenData={queenData} />
         </div>
       </div>
     </div>

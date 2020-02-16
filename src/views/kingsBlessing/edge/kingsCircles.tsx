@@ -7,6 +7,7 @@ import { updateRed } from "redux/slices/kingsBlessing/red";
 import { updateBlue } from "redux/slices/kingsBlessing/blue";
 import { kingsBlessingClickSound } from "audio";
 
+
 const KingsCircles = ({ kingData, team }) => {
   const turn = useSelector(selectTurn);
   const dispatch = useDispatch();

@@ -1,65 +1,20 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import Circle, { Slice } from "components/circle";
-import { useSelector, useDispatch } from "react-redux";
-import { selectTurn } from "redux/slices/kingsBlessing/state";
-import { updateRed } from "redux/slices/kingsBlessing/red";
-import { updateBlue } from "redux/slices/kingsBlessing/blue";
-import { kingsBlessingClickSound } from "audio";
+import Field from "./field";
+import { FieldType } from "redux/slices/kingsBlessing/selection";
+import Cows from "./cows";
 
-const Fields = ({ team, data, presentationOrder }) => {
-  const turn = useSelector(selectTurn);
-  const dispatch = useDispatch();
-  const circleCallback = field => access => {
-    if (team === turn) {
-      kingsBlessingClickSound.play();
-      if (team === "red") {
-        dispatch(
-          updateRed({
-            section: field,
-            circleIndex: access[0],
-            sliceIndex: access[1],
-          })
-        );
-      } else if (team === "blue") {
-        dispatch(
-          updateBlue({
-            section: field,
-            circleIndex: access[0],
-            sliceIndex: access[1],
-          })
-        );
-      }
-    }
-  };
-
+export default function Fields({ player }: { player: "red" | "blue" }) {
+  const presentationOrder: FieldType[] = ["wheat", "lumber", "pigs", "fruit", "water", "wool"];
   return (
     <div css={playArea}>
+      <Cows player={player} />
       {presentationOrder.map(field => {
-        return (
-          <div key={field} css={playBlock}>
-            {data[field].map((circleData, i) => {
-              return (
-                <Circle key={i} data={data[field]} turn={turn} team={team} style={{ height: "90px", width: "90px" }}>
-                  {circleData.map((value, j) => {
-                    return (
-                      <Slice
-                        access={[i, j]}
-                        key={`${i}-${j}`}
-                        onClick={circleCallback(field)}
-                        percent={1 / circleData.length}
-                      />
-                    );
-                  })}
-                </Circle>
-              );
-            })}
-          </div>
-        );
+        return <Field field={field} player={player} />;
       })}
     </div>
   );
-};
+}
 
 const playArea = css`
   display: flex;
@@ -67,16 +22,3 @@ const playArea = css`
   height: 30%;
   background-color: rgb(147, 167, 84);
 `;
-
-const playBlock = css`
-  display: flex;
-  flex: 1 1 auto;
-  border: solid 1px black;
-  width: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  padding: 5px 0;
-`;
-
-export default Fields;
