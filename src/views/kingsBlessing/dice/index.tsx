@@ -92,9 +92,9 @@ const styles = {
   positionWrapper: (turn, expanded) => css`
     position: fixed;
     width: 100%;
-    opacity: 0.8;
-
+    transition: opacity ease-in-out 200ms;
     ${turn === "red" ? "bottom: 0px;" : "top: 0px;"}
+    opacity: ${expanded ? "1" : "0.3"};
     &:hover {
       opacity: 1;
     }

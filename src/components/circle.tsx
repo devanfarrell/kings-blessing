@@ -4,7 +4,7 @@ import { Selection } from "redux/slices/kingsBlessing/selection";
 import { accessNestedArray } from "utility";
 import { colors } from "theme";
 
-export default function Circle({ style, turn, player, data, ...props }) {
+export default function Circle({ style = { height: "100%", width: "100%" }, turn, player, data, ...props }) {
   let accumulativePercent = 0;
   return (
     <svg style={style} viewBox="-103 -103 206 206">

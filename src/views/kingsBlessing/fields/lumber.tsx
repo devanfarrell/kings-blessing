@@ -4,7 +4,7 @@ import Circle, { Slice } from "components/circle";
 import { useFieldData } from "../hooks";
 
 export default function Cows({ player }: { player: "red" | "blue" }) {
-  const field = "cows";
+  const field = "lumber";
   const { turn, fieldData, sliceClickCallback } = useFieldData(player, field);
 
   return (
@@ -22,10 +22,8 @@ export default function Cows({ player }: { player: "red" | "blue" }) {
             );
           })}
         </Circle>
-        <div css={stupidExtraDiv} />
       </div>
       <div css={row}>
-        <div css={stupidExtraDiv} />
         <Circle data={fieldData} turn={turn} player={player}>
           {fieldData[1].map((_, j) => {
             return (
@@ -38,21 +36,6 @@ export default function Cows({ player }: { player: "red" | "blue" }) {
             );
           })}
         </Circle>
-      </div>
-      <div css={row}>
-        <Circle data={fieldData} turn={turn} player={player}>
-          {fieldData[2].map((_, j) => {
-            return (
-              <Slice
-                access={[2, j]}
-                key={`2-${j}`}
-                onClick={sliceClickCallback(field)}
-                percent={1 / fieldData[2].length}
-              />
-            );
-          })}
-        </Circle>
-        <div css={stupidExtraDiv} />
       </div>
     </div>
   );
@@ -74,13 +57,4 @@ const row = css`
   justify-content: space-evenly;
   height: 33%;
   flex: 1 1 auto;
-`;
-
-const stupidExtraDiv = css`
-  display: flex;
-  flex: 1 1 auto;
-  width: 50%;
-  @media (max-width: 750px) {
-    width: 0;
-  }
 `;

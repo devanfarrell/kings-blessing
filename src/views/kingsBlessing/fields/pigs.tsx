@@ -3,8 +3,8 @@ import { css, jsx } from "@emotion/core";
 import Circle, { Slice } from "components/circle";
 import { useFieldData } from "../hooks";
 
-export default function Cows({ player }: { player: "red" | "blue" }) {
-  const field = "cows";
+export default function Pigs({ player }: { player: "red" | "blue" }) {
+  const field = "pigs";
   const { turn, fieldData, sliceClickCallback } = useFieldData(player, field);
 
   return (

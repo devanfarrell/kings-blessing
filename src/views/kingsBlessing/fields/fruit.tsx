@@ -3,8 +3,8 @@ import { css, jsx } from "@emotion/core";
 import Circle, { Slice } from "components/circle";
 import { useFieldData } from "../hooks";
 
-export default function Cows({ player }: { player: "red" | "blue" }) {
-  const field = "cows";
+export default function Fruit({ player }: { player: "red" | "blue" }) {
+  const field = "fruit";
   const { turn, fieldData, sliceClickCallback } = useFieldData(player, field);
 
   return (
@@ -54,6 +54,21 @@ export default function Cows({ player }: { player: "red" | "blue" }) {
         </Circle>
         <div css={stupidExtraDiv} />
       </div>
+      <div css={row}>
+        <div css={stupidExtraDiv} />
+        <Circle data={fieldData} turn={turn} player={player}>
+          {fieldData[2].map((_, j) => {
+            return (
+              <Slice
+                access={[2, j]}
+                key={`2-${j}`}
+                onClick={sliceClickCallback(field)}
+                percent={1 / fieldData[3].length}
+              />
+            );
+          })}
+        </Circle>
+      </div>
     </div>
   );
 }
@@ -72,7 +87,7 @@ const playBlock = css`
 const row = css`
   display: flex;
   justify-content: space-evenly;
-  height: 33%;
+  height: 25%;
   flex: 1 1 auto;
 `;
 
