@@ -3,8 +3,7 @@ import { css, jsx } from "@emotion/core";
 import Circle, { Slice } from "components/circle";
 import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
-import { updateRed } from "redux/slices/kingsBlessing/red";
-import { updateBlue } from "redux/slices/kingsBlessing/blue";
+import { updateRed, updateBlue } from "redux/slices/kingsBlessing/selection";
 import { kingsBlessingClickSound } from "audio";
 
 const QueensCircles = ({ queenData, team }) => {

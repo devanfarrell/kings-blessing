@@ -7,7 +7,7 @@ var arr2 = [
   Selection.selected,
   Selection.selected,
   Selection.selected,
-  Selection.selected
+  Selection.selected,
 ];
 var arr3 = [Selection.unselected, Selection.finalized];
 var arr4 = [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2];
@@ -23,7 +23,7 @@ var arr5 = [
   Selection.unselected,
   Selection.unselected,
   Selection.unselected,
-  Selection.finalized
+  Selection.finalized,
 ];
 
 test("Test Selection Reduce", () => {

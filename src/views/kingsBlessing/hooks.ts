@@ -3,13 +3,16 @@ import { FieldType } from "redux/slices/kingsBlessing/selection";
 import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
 import {
+  selectBlueKing,
+  selectBlueQueen,
+  selectBlueField,
+  updateBlue,
   selectRedKing,
   selectRedQueen,
   selectRedField,
   selectPresentationOrder,
   updateRed,
-} from "redux/slices/kingsBlessing/red";
-import { selectBlueKing, selectBlueQueen, selectBlueField, updateBlue } from "redux/slices/kingsBlessing/blue";
+} from "redux/slices/kingsBlessing/selection";
 import { kingsBlessingClickSound } from "audio";
 
 export function useFieldData(player: "red" | "blue" = "red", field?: FieldType) {
