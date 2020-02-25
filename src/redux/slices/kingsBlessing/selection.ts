@@ -136,20 +136,26 @@ export const selectPresentationOrder = (): FieldType[] => presentationOrder;
 
 type ImplementationMatching = { implementationMatch: boolean; completedFields: FieldType[] };
 
-function genericImplementationMatch(fields: Fields, numerator: number, denominator: number): ImplementationMatching {
+export function genericImplementationMatch(
+  fields: Fields,
+  numerator: number,
+  denominator: number
+): ImplementationMatching {
   let implementation = fraction(0, 1);
   const modifiedFields: FieldType[] = [];
   let completedFields: FieldType[] = [];
 
   Object.entries(fields).forEach(([fieldKey, field]: [FieldType, Array<Array<number>>]) => {
-    let localNumerator = 0;
+
     field.forEach(circle => {
-      localNumerator += circle.reduce(selectionReduce, 0);
+      const circleNumerator = circle.reduce(selectionReduce, 0);
+      if (circleNumerator) {
+        implementation = add(fraction(circleNumerator, circle.length), implementation);
+        if (!modifiedFields.includes(fieldKey)) {
+          modifiedFields.push(fieldKey);
+        }
+      }
     });
-    if (localNumerator !== 0) {
-      modifiedFields.push(fieldKey);
-      implementation = add(fraction(localNumerator, field[0].length), implementation);
-    }
   });
 
   const implementationMatch = number(compare(implementation, fraction(numerator, denominator))) === 0;
@@ -183,22 +189,20 @@ const selectDoesBlueImplementationMatch = createSelector<any, Fields, StateReduc
   }
 );
 
+function canReroll(queenData: Field, kingData: Field): { purple: boolean; gold: boolean } {
+  const purple = queenData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
+  const gold = kingData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
+  return { purple, gold };
+}
+
 export const selectCanRedRerollDice = createSelector<any, Field, Field, { purple: boolean; gold: boolean }>(
   [selectRedQueen, selectRedKing],
-  (queenData, kingData) => {
-    const purple = queenData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
-    const gold = kingData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
-    return { purple, gold };
-  }
+  (queenData, kingData) => canReroll(queenData, kingData)
 );
 
 export const selectCanBlueRerollDice = createSelector<any, Field, Field, { purple: boolean; gold: boolean }>(
   [selectBlueQueen, selectBlueKing],
-  (queenData, kingData) => {
-    const purple = queenData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
-    const gold = kingData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
-    return { purple, gold };
-  }
+  (queenData, kingData) => canReroll(queenData, kingData)
 );
 
 const selectClaimedFields = createSelector<any, ReducerStructure, ClaimedFields>(
