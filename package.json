@@ -1,7 +1,6 @@
 {
   "name": "kings-blessing",
   "version": "0.1.0",
-  "private": true,
   "dependencies": {
     "@emotion/core": "^10.0.27",
     "@fortawesome/fontawesome-pro": "^5.12.1",
@@ -21,11 +20,15 @@
     "typescript": "^3.8.2",
     "uifx": "^2.0.7"
   },
+  "devDependencies": {
+    "gh-pages": "^2.1.1",
+    "prettier": "^1.18.2"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "deploy:github": "npm run build && node ./deploy-github"
   },
   "eslintConfig": {
     "extends": "react-app"
