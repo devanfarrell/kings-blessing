@@ -47,4 +47,5 @@ export const colors = {
   lightRed: "#f1968e",
   darkRed: "#881d11",
   darkBlue: "#1b6698",
+  purple: "#8d728b",
 };

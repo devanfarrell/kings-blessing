@@ -11,6 +11,8 @@ export enum Selection {
   finalized,
 }
 
+export type RedOrBlue = "red" | "blue";
+
 export type FieldType = "cows" | "wheat" | "lumber" | "pigs" | "fruit" | "water" | "wool";
 
 type Field = Selection[][];
@@ -27,9 +29,14 @@ export interface Fields {
   queen: Field;
 }
 
+type ClaimedFields = {
+  [key in FieldType]: null | RedOrBlue;
+};
+
 export interface ReducerStructure {
   red: Fields;
   blue: Fields;
+  claimedField: ClaimedFields;
 }
 
 const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
@@ -53,7 +60,7 @@ export const updateRed = playerSelectionSlice.createAction<updateAction>(
   (draft: ReducerStructure, { section, circleIndex, sliceIndex }) => {
     if (draft.red[section][circleIndex][sliceIndex] === Selection.unselected) {
       draft.red[section][circleIndex][sliceIndex] = Selection.selected;
-    } else if (draft[section][circleIndex][sliceIndex] === Selection.selected) {
+    } else if (draft.red[section][circleIndex][sliceIndex] === Selection.selected) {
       draft.red[section][circleIndex][sliceIndex] = Selection.unselected;
     }
   }
@@ -64,13 +71,13 @@ export const updateBlue = playerSelectionSlice.createAction<updateAction>(
   (draft: ReducerStructure, { section, circleIndex, sliceIndex }) => {
     if (draft.blue[section][circleIndex][sliceIndex] === Selection.unselected) {
       draft.blue[section][circleIndex][sliceIndex] = Selection.selected;
-    } else if (draft[section][circleIndex][sliceIndex] === Selection.selected) {
+    } else if (draft.blue[section][circleIndex][sliceIndex] === Selection.selected) {
       draft.blue[section][circleIndex][sliceIndex] = Selection.unselected;
     }
   }
 );
 
-const finalizeAnswers = playerSelectionSlice.createAction<"red" | "blue">("finalizeAnswers", (draft, player) => {
+const finalizeAnswers = playerSelectionSlice.createAction<RedOrBlue>("finalizeAnswers", (draft, player) => {
   [...presentationOrder, "king", "queen"].forEach(fieldKey => {
     draft[player][fieldKey].forEach(circle =>
       circle.forEach((slice, i) => {
@@ -82,7 +89,7 @@ const finalizeAnswers = playerSelectionSlice.createAction<"red" | "blue">("final
   });
 });
 
-const clearSelectedAnswers = playerSelectionSlice.createAction<"red" | "blue">("clearAnswers", (draft, player) => {
+const clearSelectedAnswers = playerSelectionSlice.createAction<RedOrBlue>("clearAnswers", (draft, player) => {
   [...presentationOrder, "king", "queen"].forEach(fieldKey => {
     draft[player][fieldKey].forEach(circle =>
       circle.forEach((slice, i) => {
@@ -93,6 +100,13 @@ const clearSelectedAnswers = playerSelectionSlice.createAction<"red" | "blue">("
     );
   });
 });
+
+const claimField = playerSelectionSlice.createAction<{ player: RedOrBlue; field: FieldType }>(
+  "claimField",
+  (draft, { player, field }) => {
+    draft.claimedField[field] = player;
+  }
+);
 
 /**
  * Selectors
@@ -120,41 +134,52 @@ export const selectBlueField = createSelector<any, Fields, Fields>([blueSelector
 
 export const selectPresentationOrder = (): FieldType[] => presentationOrder;
 
-const selectDoesRedImplementationMatch = createSelector<any, Fields, StateReducerStructure, boolean>(
+type ImplementationMatching = { implementationMatch: boolean; completedFields: FieldType[] };
+
+function genericImplementationMatch(fields: Fields, numerator: number, denominator: number): ImplementationMatching {
+  let implementation = fraction(0, 1);
+  const modifiedFields: FieldType[] = [];
+  let completedFields: FieldType[] = [];
+
+  Object.entries(fields).forEach(([fieldKey, field]: [FieldType, Array<Array<number>>]) => {
+    let localNumerator = 0;
+    field.forEach(circle => {
+      localNumerator += circle.reduce(selectionReduce, 0);
+    });
+    if (localNumerator !== 0) {
+      modifiedFields.push(fieldKey);
+      implementation = add(fraction(localNumerator, field[0].length), implementation);
+    }
+  });
+
+  const implementationMatch = number(compare(implementation, fraction(numerator, denominator))) === 0;
+
+  if (implementationMatch) {
+    // check the modified fields. If any of them are complete, return it in an object called completed fields
+    const result: Array<FieldType | null> = modifiedFields.map(fieldType =>
+      fields[fieldType].every(circle =>
+        circle.every(implementation => implementation === Selection.finalized || implementation === Selection.selected)
+      )
+        ? fieldType
+        : null
+    );
+    completedFields = result.filter(type => type !== null);
+  }
+
+  return { implementationMatch, completedFields };
+}
+
+const selectDoesRedImplementationMatch = createSelector<any, Fields, StateReducerStructure, ImplementationMatching>(
   [redSelector, selectState],
   (fields, { numerator, denominator }) => {
-    let implementation = fraction(0, 1);
-
-    Object.values(fields).forEach((field: Array<Array<number>>) => {
-      let localNumerator = 0;
-      field.forEach(circle => {
-        localNumerator += circle.reduce(selectionReduce, 0);
-      });
-      if (localNumerator !== 0) {
-        implementation = add(fraction(localNumerator, field[0].length), implementation);
-      }
-    });
-
-    return number(compare(implementation, fraction(numerator, denominator))) === 0;
+    return genericImplementationMatch(fields, numerator, denominator);
   }
 );
 
-const selectDoesBlueImplementationMatch = createSelector<any, Fields, StateReducerStructure, boolean>(
+const selectDoesBlueImplementationMatch = createSelector<any, Fields, StateReducerStructure, ImplementationMatching>(
   [blueSelector, selectState],
   (fields, { numerator, denominator }) => {
-    let implementation = fraction(0, 1);
-
-    Object.values(fields).forEach((field: Array<Array<number>>) => {
-      let localNumerator = 0;
-      field.forEach(circle => {
-        localNumerator += circle.reduce(selectionReduce, 0);
-      });
-      if (localNumerator !== 0) {
-        implementation = add(fraction(localNumerator, field[0].length), implementation);
-      }
-    });
-
-    return number(compare(implementation, fraction(numerator, denominator))) === 0;
+    return genericImplementationMatch(fields, numerator, denominator);
   }
 );
 
@@ -176,34 +201,74 @@ export const selectCanBlueRerollDice = createSelector<any, Field, Field, { purpl
   }
 );
 
+const selectClaimedFields = createSelector<any, ReducerStructure, ClaimedFields>(
+  [rawSelector],
+  data => data.claimedField
+);
+
+export const selectOwnedFields = createSelector<any, ClaimedFields, Array<null | RedOrBlue>>(
+  [selectClaimedFields],
+  claimedFields => presentationOrder.map(fieldName => claimedFields[fieldName])
+);
+
 /**
  * Sagas
  */
 
-export const submitRedAnswer = playerSelectionSlice.createSideEffect("submitAnswerRed", function*() {
-  const implementationMatch = yield effects.select(selectDoesRedImplementationMatch);
-  if (implementationMatch) {
+function genericSuccess(player: RedOrBlue) {
+  if (player === "red") {
     toast.error("Way to go Red!");
-    yield effects.put(finalizeAnswers("red"));
-    kingsBlessingSuccessSound.play();
   } else {
-    toast.error("Sorry, better luck next time.");
-    yield effects.put(clearSelectedAnswers("red"));
+    toast.info("Way to go Blue!");
+  }
+  kingsBlessingSuccessSound.play();
+}
+
+function* submitAbstraction(player: RedOrBlue, implementationMatch: ImplementationMatching) {
+  if (implementationMatch.implementationMatch) {
+    if (implementationMatch.completedFields.length > 0) {
+      const fields: ClaimedFields = yield effects.select(selectClaimedFields);
+      let didClaimField: boolean = false;
+      for (let i of implementationMatch.completedFields) {
+        if (fields[i] === null) {
+          didClaimField = true;
+          yield effects.put(claimField({ player, field: i }));
+          if (player === "red") {
+            toast.error(`Red completed the ${i} field!`);
+          } else {
+            toast.info(`Blue completed the ${i} field!`);
+          }
+        }
+      }
+      if (didClaimField) {
+        kingsBlessingSuccessSound.play();
+      } else {
+        genericSuccess(player);
+      }
+    } else {
+      genericSuccess(player);
+    }
+    yield effects.put(finalizeAnswers(player));
+  } else {
+    if (player === "red") {
+      toast.error("Sorry, better luck next time.");
+    } else {
+      toast.info("Sorry, better luck next time.");
+    }
+
+    yield effects.put(clearSelectedAnswers(player));
     kingsBlessingFailSound.play();
   }
-  yield effects.put(switchPlayers(new Date().toISOString()));
+
+  yield effects.put(switchPlayers());
+}
+
+export const submitRedAnswer = playerSelectionSlice.createSideEffect("submitAnswerRed", function*() {
+  const implementationMatch: ImplementationMatching = yield effects.select(selectDoesRedImplementationMatch);
+  yield submitAbstraction("red", implementationMatch);
 });
 
 export const submitBlueAnswer = playerSelectionSlice.createSideEffect("submitAnswerBlue", function*() {
-  const implementationMatch = yield effects.select(selectDoesBlueImplementationMatch);
-  if (implementationMatch) {
-    toast.info("Way to go Blue!");
-    yield effects.put(finalizeAnswers("blue"));
-    kingsBlessingSuccessSound.play();
-  } else {
-    toast.info("Sorry, better luck next time.");
-    yield effects.put(clearSelectedAnswers("blue"));
-    kingsBlessingFailSound.play();
-  }
-  yield effects.put(switchPlayers());
+  const implementationMatch: ImplementationMatching = yield effects.select(selectDoesBlueImplementationMatch);
+  yield submitAbstraction("blue", implementationMatch);
 });

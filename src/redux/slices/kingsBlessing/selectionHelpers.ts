@@ -39,6 +39,15 @@ const fieldsInitialState = (): Fields => ({
 export const generateInitialState = (): ReducerStructure => ({
   blue: fieldsInitialState(),
   red: fieldsInitialState(),
+  claimedField: {
+    cows: null,
+    wheat: null,
+    lumber: null,
+    pigs: null,
+    fruit: null,
+    water: null,
+    wool: null,
+  },
 });
 
 export const selectionReduce = (accumulator: Selection, currentValue: number) =>

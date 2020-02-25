@@ -1,39 +1,37 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { ReactComponent as Crown } from "./crown.svg";
+import { useSelector } from "react-redux";
+import Crown from "./crownSvg";
+import { selectOwnedFields } from "redux/slices/kingsBlessing/selection";
 
 const Center = () => {
-
+  const owners = useSelector(selectOwnedFields);
   return (
     <div css={centerStyle}>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[0]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[1]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[2]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[3]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[4]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[5]} />
       </div>
       <div css={crownSection}>
-        <Crown css={crownStyle} />
+        <Crown player={owners[6]} />
       </div>
     </div>
   );
 };
-
-const crownStyle = css`
-  width: 40%;
-`;
 
 const centerStyle = css`
   display: flex;
