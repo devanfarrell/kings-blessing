@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.js": "/static/js/main.e41f4a7f.chunk.js",
+    "main.js.map": "/static/js/main.e41f4a7f.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.931197c8.js",
+    "runtime-main.js.map": "/static/js/runtime-main.931197c8.js.map",
+    "static/css/2.f7347798.chunk.css": "/static/css/2.f7347798.chunk.css",
+    "static/js/2.466639d1.chunk.js": "/static/js/2.466639d1.chunk.js",
+    "static/js/2.466639d1.chunk.js.map": "/static/js/2.466639d1.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.03ab720535dc916ceac3d3648eae9bc7.js": "/precache-manifest.03ab720535dc916ceac3d3648eae9bc7.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.f7347798.chunk.css.map": "/static/css/2.f7347798.chunk.css.map",
+    "static/js/2.466639d1.chunk.js.LICENSE.txt": "/static/js/2.466639d1.chunk.js.LICENSE.txt",
+    "static/media/kings_blessing_click.wav": "/static/media/kings_blessing_click.8e3d57be.wav",
+    "static/media/kings_blessing_fail.wav": "/static/media/kings_blessing_fail.6c497ffb.wav",
+    "static/media/kings_blessing_success.wav": "/static/media/kings_blessing_success.c54374c9.wav"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.931197c8.js",
+    "static/css/2.f7347798.chunk.css",
+    "static/js/2.466639d1.chunk.js",
+    "static/js/main.e41f4a7f.chunk.js"
+  ]
+}
