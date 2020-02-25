@@ -100,16 +100,14 @@ export const selectTurn = createSelector([selectState], (state: StateReducerStru
   return state.turn ? "blue" : "red";
 });
 
-export const selectGoldDie = createSelector(
+export const selectGoldDie = createSelector<any, StateReducerStructure, GoldDie>([selectState], state => state.goldDie);
+
+export const selectPurpleDie = createSelector<any, StateReducerStructure, PurpleDie>(
   [selectState],
-  (state: StateReducerStructure): GoldDie => {
-    return state.goldDie;
-  }
+  state => state.purpleDie
 );
 
-export const selectPurpleDie = createSelector(
+export const selectHaveRerolled = createSelector<any, StateReducerStructure, { gold: boolean; purple: boolean }>(
   [selectState],
-  (state: StateReducerStructure): PurpleDie => {
-    return state.purpleDie;
-  }
+  state => ({ gold: state.haveRerolledGoldDie, purple: state.haveRerolledPurpleDie })
 );

@@ -5,8 +5,6 @@ export default function Crown({ player }: { player: "red" | "blue" | null }) {
   const redBlue = player === "red" ? colors.red : colors.blue;
   const color = player ? redBlue : colors.purple;
 
-  console.debug(color);
-
   return (
     <svg viewBox="0 0 167 117" width="40%">
       <g transform="translate(-40.644 -59.035) translate(8.177 -13.54) scale(.30303)">
