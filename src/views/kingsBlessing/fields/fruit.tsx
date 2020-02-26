@@ -57,7 +57,7 @@ export default function Fruit({ player }: { player: "red" | "blue" }) {
       <div css={row}>
         <div css={stupidExtraDiv} />
         <Circle data={fieldData} turn={turn} player={player}>
-          {fieldData[2].map((_, j) => {
+          {fieldData[3].map((_, j) => {
             return (
               <Slice
                 access={[2, j]}
