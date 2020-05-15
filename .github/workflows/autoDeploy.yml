@@ -27,7 +27,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install
         run: |
-          npm config set @fortawesome:registry https://npm.fontawesome.com/ //npm.fontawesome.com/:_authToken="${{ secrets.NPM_TOKEN_FONTAWESOME }}""
+          npm config set @fortawesome:registry https://npm.fontawesome.com/ '//npm.fontawesome.com/:_authToken' "${{ secrets.NPM_TOKEN_FONTAWESOME }}""
           npm ci
       - name: Build
         run: npm run build
