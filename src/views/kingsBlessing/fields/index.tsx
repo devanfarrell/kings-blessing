@@ -1,23 +1,18 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import Cows from "./cows";
-import Wheat from "./wheat";
-import Lumber from "./lumber";
-import Pigs from "./pigs";
-import Fruit from "./fruit";
-import Water from "./water";
-import Wool from "./wool";
+import Field from "./field";
+import { RedOrBlue, presentationOrder } from "redux/slices/kingsBlessing/selection";
 
-export default function Fields({ player }: { player: "red" | "blue" }) {
+interface FieldsProps {
+  player: RedOrBlue;
+}
+
+export default function Fields({ player }: FieldsProps) {
   return (
     <div css={playArea}>
-      <Cows player={player} />
-      <Wheat player={player} />
-      <Lumber player={player} />
-      <Pigs player={player} />
-      <Fruit player={player} />
-      <Water player={player} />
-      <Wool player={player} />
+      {presentationOrder.map((field) => (
+        <Field key={field} {...{ player, field }} />
+      ))}
     </div>
   );
 }

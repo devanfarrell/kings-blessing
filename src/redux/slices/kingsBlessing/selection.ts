@@ -17,7 +17,7 @@ export type FieldType = "cows" | "wheat" | "lumber" | "pigs" | "fruit" | "water"
 
 export type ExtendedFieldType = FieldType | "queen" | "king";
 
-const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
+export const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
 const extendedFieldArray: ExtendedFieldType[] = [...presentationOrder, "king", "queen"];
 
 export type Field = Selection[][];

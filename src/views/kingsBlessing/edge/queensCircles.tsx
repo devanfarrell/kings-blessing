@@ -46,26 +46,26 @@ const QueensCircles = ({ queenData, team }: QueensCirclesProps) => {
     <div css={circleWrapper}>
       <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[0, 0]} onClick={circleCallback} percent={1 / 6} />
-        <Slice percent={1 / 6} />
+        <Slice percent={1 / 6} disabled />
         <Slice access={[0, 2]} onClick={circleCallback} percent={1 / 6} />
-        <Slice percent={1 / 6} />
+        <Slice percent={1 / 6} disabled />
         <Slice access={[0, 4]} onClick={circleCallback} percent={1 / 6} />
-        <Slice percent={1 / 6} />
+        <Slice percent={1 / 6} disabled />
       </Circle>
       <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[1, 0]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 1]} onClick={circleCallback} percent={1 / 10} />
         <Slice access={[1, 2]} onClick={circleCallback} percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
-        <Slice percent={1 / 10} />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
+        <Slice percent={1 / 10} disabled />
       </Circle>
       <Circle data={queenData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
-        <Slice percent={1 / 12} />
+        <Slice percent={1 / 12} disabled />
         <Slice access={[2, 1]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 2]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 3]} onClick={circleCallback} percent={1 / 12} />
@@ -76,7 +76,7 @@ const QueensCircles = ({ queenData, team }: QueensCirclesProps) => {
         <Slice access={[2, 8]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 9]} onClick={circleCallback} percent={1 / 12} />
         <Slice access={[2, 10]} onClick={circleCallback} percent={1 / 12} />
-        <Slice percent={1 / 12} />
+        <Slice percent={1 / 12} disabled />
       </Circle>
     </div>
   );

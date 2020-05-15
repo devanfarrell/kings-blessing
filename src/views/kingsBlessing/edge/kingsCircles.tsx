@@ -46,22 +46,22 @@ export default function KingsCircles({ kingData, team }: KingsBlessingProps) {
     <div css={circleWrapper}>
       <Circle data={kingData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[0, 0]} onClick={circleCallback} percent={1 / 2} />
-        <Slice percent={1 / 2} />
+        <Slice percent={1 / 2} disabled />
       </Circle>
       <Circle data={kingData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
         <Slice access={[1, 0]} onClick={circleCallback} percent={1 / 3} />
         <Slice access={[1, 1]} onClick={circleCallback} percent={1 / 3} />
-        <Slice percent={1 / 3} />
+        <Slice percent={1 / 3} disabled />
       </Circle>
       <Circle data={kingData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
-        <Slice percent={1 / 8} />
-        <Slice percent={1 / 8} />
-        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} disabled />
+        <Slice percent={1 / 8} disabled />
+        <Slice percent={1 / 8} disabled />
         <Slice onClick={circleCallback} percent={1 / 8} access={[2, 3]} />
         <Slice onClick={circleCallback} percent={1 / 8} access={[2, 4]} />
-        <Slice percent={1 / 8} />
-        <Slice percent={1 / 8} />
-        <Slice percent={1 / 8} />
+        <Slice percent={1 / 8} disabled />
+        <Slice percent={1 / 8} disabled />
+        <Slice percent={1 / 8} disabled />
       </Circle>
     </div>
   );

@@ -11,6 +11,7 @@ interface CircleProps {
   data: Field;
   player: RedOrBlue;
   turn: RedOrBlue;
+  className?: string; 
 }
 
 export default function Circle({
@@ -19,13 +20,14 @@ export default function Circle({
   player,
   data,
   children,
+  className
 }: CircleProps) {
   let accumulativePercent = 0;
   return (
-    <svg style={style} viewBox="-103 -103 206 206">
+    <svg className={className} style={style} viewBox="-103 -103 206 206">
       <g transform="rotate(-90)">
         {children.map((child, i) => {
-          const { access, onClick, percent }: SliceProps = child.props;
+          const { access, onClick, percent, disabled = false }: SliceProps = child.props;
 
           const finalizedColor = player === "red" ? colors.red : colors.blue;
           const selectedColor = player === "red" ? colors.lightRed : colors.lightBlue;
@@ -37,7 +39,8 @@ export default function Circle({
             calculatedColor = state === Selection.finalized ? finalizedColor : calculatedColor;
           }
 
-          const color = onClick ? calculatedColor : "grey";
+          const color = disabled ? "grey" : calculatedColor;
+
           const pathString = coordinateString(percent, accumulativePercent);
           accumulativePercent += percent;
 
@@ -66,6 +69,7 @@ interface SliceProps {
   percent: number;
   color?: string;
   access?: [number, number];
+  disabled?: boolean;
 }
 
 export function Slice(props: SliceProps) {
