@@ -1,25 +1,26 @@
 {
   "files": {
-    "main.js": "/static/js/main.b558e1b6.chunk.js",
-    "main.js.map": "/static/js/main.b558e1b6.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.931197c8.js",
-    "runtime-main.js.map": "/static/js/runtime-main.931197c8.js.map",
-    "static/css/2.f7347798.chunk.css": "/static/css/2.f7347798.chunk.css",
-    "static/js/2.66890e03.chunk.js": "/static/js/2.66890e03.chunk.js",
-    "static/js/2.66890e03.chunk.js.map": "/static/js/2.66890e03.chunk.js.map",
+    "main.js": "/static/js/main.e656558f.chunk.js",
+    "main.js.map": "/static/js/main.e656558f.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.19f9e34f.js",
+    "runtime-main.js.map": "/static/js/runtime-main.19f9e34f.js.map",
+    "static/css/2.438eb863.chunk.css": "/static/css/2.438eb863.chunk.css",
+    "static/js/2.b9e037f6.chunk.js": "/static/js/2.b9e037f6.chunk.js",
+    "static/js/2.b9e037f6.chunk.js.map": "/static/js/2.b9e037f6.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.8c41a93440a243a179ae0ad28ff55cf5.js": "/precache-manifest.8c41a93440a243a179ae0ad28ff55cf5.js",
+    "precache-manifest.9764041a72a6eeaad06fd815e6289444.js": "/precache-manifest.9764041a72a6eeaad06fd815e6289444.js",
     "service-worker.js": "/service-worker.js",
-    "static/css/2.f7347798.chunk.css.map": "/static/css/2.f7347798.chunk.css.map",
-    "static/js/2.66890e03.chunk.js.LICENSE.txt": "/static/js/2.66890e03.chunk.js.LICENSE.txt",
+    "static/css/2.438eb863.chunk.css.map": "/static/css/2.438eb863.chunk.css.map",
+    "static/js/2.b9e037f6.chunk.js.LICENSE.txt": "/static/js/2.b9e037f6.chunk.js.LICENSE.txt",
     "static/media/kings_blessing_fail.wav": "/static/media/kings_blessing_fail.6c497ffb.wav",
     "static/media/kings_blessing_success.wav": "/static/media/kings_blessing_success.c54374c9.wav",
-    "static/media/kings_blessing_tick.mp3": "/static/media/kings_blessing_tick.eb69c905.mp3"
+    "static/media/kings_blessing_tick.mp3": "/static/media/kings_blessing_tick.eb69c905.mp3",
+    "static/media/lace.svg": "/static/media/lace.21f6ac1a.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.931197c8.js",
-    "static/css/2.f7347798.chunk.css",
-    "static/js/2.66890e03.chunk.js",
-    "static/js/main.b558e1b6.chunk.js"
+    "static/js/runtime-main.19f9e34f.js",
+    "static/css/2.438eb863.chunk.css",
+    "static/js/2.b9e037f6.chunk.js",
+    "static/js/main.e656558f.chunk.js"
   ]
 }
