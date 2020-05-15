@@ -1,6 +1,6 @@
 import { createSlice, createSelector, effects } from "redux-dogma";
 import { StateReducerStructure, selectState, switchPlayers } from "./state";
-import { fraction, add, compare, number } from "mathjs";
+import { fraction, add, compare, number, MathType } from "mathjs";
 import { toast } from "react-toastify";
 import { kingsBlessingFailSound, kingsBlessingSuccessSound } from "audio";
 import { selectionReduce, generateInitialState } from "./selectionHelpers";
@@ -15,7 +15,12 @@ export type RedOrBlue = "red" | "blue";
 
 export type FieldType = "cows" | "wheat" | "lumber" | "pigs" | "fruit" | "water" | "wool";
 
-type Field = Selection[][];
+export type ExtendedFieldType = FieldType | "queen" | "king";
+
+const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
+const extendedFieldArray: ExtendedFieldType[] = [...presentationOrder, "king", "queen"];
+
+export type Field = Selection[][];
 
 export interface Fields {
   cows: Field;
@@ -39,8 +44,6 @@ export interface ReducerStructure {
   claimedField: ClaimedFields;
 }
 
-const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
-
 export const playerSelectionSlice = createSlice<ReducerStructure>("playerStructure", generateInitialState());
 
 /***
@@ -50,7 +53,7 @@ export const playerSelectionSlice = createSlice<ReducerStructure>("playerStructu
  */
 
 interface updateAction {
-  section: string;
+  section: ExtendedFieldType;
   circleIndex: number;
   sliceIndex: number;
 }
@@ -77,9 +80,9 @@ export const updateBlue = playerSelectionSlice.createAction<updateAction>(
   }
 );
 
-const finalizeAnswers = playerSelectionSlice.createAction<RedOrBlue>("finalizeAnswers", (draft, player) => {
-  [...presentationOrder, "king", "queen"].forEach(fieldKey => {
-    draft[player][fieldKey].forEach(circle =>
+const finalizeAnswers = playerSelectionSlice.createAction<RedOrBlue>("finalizeAnswers", (draft, player: RedOrBlue) => {
+  extendedFieldArray.forEach((fieldKey) => {
+    draft[player][fieldKey].forEach((circle) =>
       circle.forEach((slice, i) => {
         if (slice === Selection.selected) {
           circle[i] = Selection.finalized;
@@ -90,8 +93,8 @@ const finalizeAnswers = playerSelectionSlice.createAction<RedOrBlue>("finalizeAn
 });
 
 const clearSelectedAnswers = playerSelectionSlice.createAction<RedOrBlue>("clearAnswers", (draft, player) => {
-  [...presentationOrder, "king", "queen"].forEach(fieldKey => {
-    draft[player][fieldKey].forEach(circle =>
+  extendedFieldArray.forEach((fieldKey) => {
+    draft[player][fieldKey].forEach((circle) =>
       circle.forEach((slice, i) => {
         if (slice === Selection.selected) {
           circle[i] = Selection.unselected;
@@ -123,14 +126,14 @@ export const blueSelector = createSelector<any, ReducerStructure, Fields>(
   (state: ReducerStructure) => state.blue
 );
 
-export const selectRedKing = createSelector<any, Fields, Field>([redSelector], state => state.king);
-export const selectBlueKing = createSelector<any, Fields, Field>([blueSelector], state => state.king);
+export const selectRedKing = createSelector<any, Fields, Field>([redSelector], (state) => state.king);
+export const selectBlueKing = createSelector<any, Fields, Field>([blueSelector], (state) => state.king);
 
-export const selectRedQueen = createSelector<any, Fields, Field>([redSelector], state => state.queen);
-export const selectBlueQueen = createSelector<any, Fields, Field>([blueSelector], state => state.queen);
+export const selectRedQueen = createSelector<any, Fields, Field>([redSelector], (state) => state.queen);
+export const selectBlueQueen = createSelector<any, Fields, Field>([blueSelector], (state) => state.queen);
 
-export const selectRedField = createSelector<any, Fields, Fields>([redSelector], state => state);
-export const selectBlueField = createSelector<any, Fields, Fields>([blueSelector], state => state);
+export const selectRedField = createSelector<any, Fields, Fields>([redSelector], (state) => state);
+export const selectBlueField = createSelector<any, Fields, Fields>([blueSelector], (state) => state);
 
 export const selectPresentationOrder = (): FieldType[] => presentationOrder;
 
@@ -141,13 +144,14 @@ export function genericImplementationMatch(
   numerator: number,
   denominator: number
 ): ImplementationMatching {
-  let implementation = fraction(0, 1);
+  let implementation: MathType = fraction(0, 1);
   const modifiedFields: FieldType[] = [];
   let completedFields: FieldType[] = [];
 
-  Object.entries(fields).forEach(([fieldKey, field]: [FieldType, Array<Array<number>>]) => {
+  const entries = Object.entries(fields) as [FieldType, Field][];
 
-    field.forEach(circle => {
+  entries.forEach(([fieldKey, field]) => {
+    field.forEach((circle) => {
       const circleNumerator = circle.reduce(selectionReduce, 0);
       if (circleNumerator) {
         implementation = add(fraction(circleNumerator, circle.length), implementation);
@@ -162,14 +166,16 @@ export function genericImplementationMatch(
 
   if (implementationMatch) {
     // check the modified fields. If any of them are complete, return it in an object called completed fields
-    const result: Array<FieldType | null> = modifiedFields.map(fieldType =>
-      fields[fieldType].every(circle =>
-        circle.every(implementation => implementation === Selection.finalized || implementation === Selection.selected)
+    const result: Array<FieldType | null> = modifiedFields.map((fieldType) =>
+      fields[fieldType].every((circle) =>
+        circle.every(
+          (implementation) => implementation === Selection.finalized || implementation === Selection.selected
+        )
       )
         ? fieldType
         : null
     );
-    completedFields = result.filter(type => type !== null);
+    completedFields = result.filter((type) => type !== null) as FieldType[];
   }
 
   return { implementationMatch, completedFields };
@@ -190,8 +196,8 @@ const selectDoesBlueImplementationMatch = createSelector<any, Fields, StateReduc
 );
 
 function canReroll(queenData: Field, kingData: Field): { purple: boolean; gold: boolean } {
-  const purple = queenData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
-  const gold = kingData.every(circle => circle.every(pieSlice => pieSlice === Selection.finalized));
+  const purple = queenData.every((circle) => circle.every((pieSlice) => pieSlice === Selection.finalized));
+  const gold = kingData.every((circle) => circle.every((pieSlice) => pieSlice === Selection.finalized));
   return { purple, gold };
 }
 
@@ -207,12 +213,12 @@ export const selectCanBlueRerollDice = createSelector<any, Field, Field, { purpl
 
 const selectClaimedFields = createSelector<any, ReducerStructure, ClaimedFields>(
   [rawSelector],
-  data => data.claimedField
+  (data) => data.claimedField
 );
 
 export const selectOwnedFields = createSelector<any, ClaimedFields, Array<null | RedOrBlue>>(
   [selectClaimedFields],
-  claimedFields => presentationOrder.map(fieldName => claimedFields[fieldName])
+  (claimedFields) => presentationOrder.map((fieldName) => claimedFields[fieldName])
 );
 
 /**
@@ -267,12 +273,12 @@ function* submitAbstraction(player: RedOrBlue, implementationMatch: Implementati
   yield effects.put(switchPlayers());
 }
 
-export const submitRedAnswer = playerSelectionSlice.createSideEffect("submitAnswerRed", function*() {
+export const submitRedAnswer = playerSelectionSlice.createSideEffect("submitAnswerRed", function* () {
   const implementationMatch: ImplementationMatching = yield effects.select(selectDoesRedImplementationMatch);
   yield submitAbstraction("red", implementationMatch);
 });
 
-export const submitBlueAnswer = playerSelectionSlice.createSideEffect("submitAnswerBlue", function*() {
+export const submitBlueAnswer = playerSelectionSlice.createSideEffect("submitAnswerBlue", function* () {
   const implementationMatch: ImplementationMatching = yield effects.select(selectDoesBlueImplementationMatch);
   yield submitAbstraction("blue", implementationMatch);
 });

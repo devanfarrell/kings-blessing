@@ -3,8 +3,14 @@ import { css, jsx } from "@emotion/core";
 import KingsCircles from "./kingsCircles";
 import QueensCircles from "./queensCircles";
 import { useFieldData } from "../hooks";
+import { RedOrBlue } from "redux/slices/kingsBlessing/selection";
+import lace from "../images/lace.svg";
 
-export default function Edge({ player }: { player: "red" | "blue" }) {
+interface EdgeProps {
+  player: RedOrBlue;
+}
+
+export default function Edge({ player }: EdgeProps) {
   const { kingData, queenData } = useFieldData(player);
 
   return (
@@ -17,9 +23,6 @@ export default function Edge({ player }: { player: "red" | "blue" }) {
         <div css={twoThirds}>
           <KingsCircles team={player} kingData={kingData} />
         </div>
-      </div>
-      <div css={onePart}>
-        <div css={partTitle} />
       </div>
       <div css={threeParts}>
         <div css={oneThird}>
@@ -58,13 +61,8 @@ const threeParts = css`
   width: 300%;
   flex: 1 1 auto;
   background-color: #e5ddee;
-  background-image: url(/images/lace.svg);
-`;
-
-const onePart = css`
-  width: 10%;
-  flex: 1 1 auto;
-  background-color: #ffdb58;
+  background-size: 700px 700px;
+  background-image: url(${lace});
 `;
 
 const edges = css`

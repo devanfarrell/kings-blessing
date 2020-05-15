@@ -3,8 +3,9 @@ import { css, jsx } from "@emotion/core";
 import { useSelector } from "react-redux";
 import Crown from "./crownSvg";
 import { selectOwnedFields } from "redux/slices/kingsBlessing/selection";
+import path from '../images/stone.jpg'
 
-const Center = () => {
+export default function Center() {
   const owners = useSelector(selectOwnedFields);
   return (
     <div css={centerStyle}>
@@ -31,14 +32,15 @@ const Center = () => {
       </div>
     </div>
   );
-};
+}
 
 const centerStyle = css`
   display: flex;
   flex-direction: row;
   height: 10%;
   background-color: #e5ddee;
-  background-image: url(/images/lace.svg);
+  background-size: 30px 30px;
+  background-image: url(${path});
 `;
 
 const crownSection = css`
@@ -49,5 +51,3 @@ const crownSection = css`
   justify-content: center;
   align-items: center;
 `;
-
-export default Center;

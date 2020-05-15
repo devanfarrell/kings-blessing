@@ -3,35 +3,45 @@ import { css, jsx } from "@emotion/core";
 import Circle, { Slice } from "components/circle";
 import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
-import { updateRed, updateBlue } from "redux/slices/kingsBlessing/selection";
+import { updateRed, updateBlue, Field, RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { kingsBlessingClickSound } from "audio";
+import { useCallback } from "react";
 
-const KingsCircles = ({ kingData, team }) => {
+interface KingsBlessingProps {
+  kingData: Field;
+  team: RedOrBlue;
+}
+
+export default function KingsCircles({ kingData, team }: KingsBlessingProps) {
   const turn = useSelector(selectTurn);
   const dispatch = useDispatch();
 
-  const circleCallback = access => {
-    if (team === turn) {
-      kingsBlessingClickSound.play();
-      if (team === "red") {
-        dispatch(
-          updateRed({
-            section: "king",
-            circleIndex: access[0],
-            sliceIndex: access[1],
-          })
-        );
-      } else if (team === "blue") {
-        dispatch(
-          updateBlue({
-            section: "king",
-            circleIndex: access[0],
-            sliceIndex: access[1],
-          })
-        );
+  const circleCallback = useCallback(
+    (access: [number, number]) => {
+      if (team === turn) {
+        kingsBlessingClickSound.play();
+        if (team === "red") {
+          dispatch(
+            updateRed({
+              section: "king",
+              circleIndex: access[0],
+              sliceIndex: access[1],
+            })
+          );
+        } else if (team === "blue") {
+          dispatch(
+            updateBlue({
+              section: "king",
+              circleIndex: access[0],
+              sliceIndex: access[1],
+            })
+          );
+        }
       }
-    }
-  };
+    },
+    [dispatch, team, turn]
+  );
+
   return (
     <div css={circleWrapper}>
       <Circle data={kingData} turn={turn} player={team} style={{ height: "90px", width: "90px" }}>
@@ -55,7 +65,7 @@ const KingsCircles = ({ kingData, team }) => {
       </Circle>
     </div>
   );
-};
+}
 
 const circleWrapper = css`
   display: flex;
@@ -63,5 +73,3 @@ const circleWrapper = css`
   align-items: center;
   height: 100%;
 `;
-
-export default KingsCircles;

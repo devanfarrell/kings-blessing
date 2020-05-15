@@ -8,9 +8,12 @@ const Portal = memo(({ children }) => {
 
   useLayoutEffect(() => {
     const child = el.current;
-    portalRoot.appendChild(child);
-
-    return () => portalRoot.removeChild(child);
+    if (portalRoot) {
+      portalRoot.appendChild(child);
+      return () => {
+        portalRoot.removeChild(child);
+      };
+    }
   }, []);
 
   return ReactDOM.createPortal(children, el.current);

@@ -10,7 +10,7 @@ interface Props {
 }
 
 const timer = 10;
-let timeout = null;
+let timeout: NodeJS.Timeout | null = null;
 
 export default function SuccessModal({ isOpen, close }: Props) {
   const closeCallback = useCallback(() => {

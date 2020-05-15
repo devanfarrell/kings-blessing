@@ -4,12 +4,9 @@ import { createStoreAbstraction } from "redux-dogma";
 
 import { kingsBlessingSlice } from "./slices/kingsBlessing";
 
-const store = createStoreAbstraction()
-  .addSlice(kingsBlessingSlice)
-  .lockSideEffects()
-  .getStore();
+const store = createStoreAbstraction().addSlice(kingsBlessingSlice).lockSideEffects().getStore();
 
-const reduxProvider = ({ children }) => {
+const reduxProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
 };
 

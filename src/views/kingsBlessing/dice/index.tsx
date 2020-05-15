@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import GoldDie from "./gold";
 import PurpleDie from "./purple";
-import { submitRedAnswer, submitBlueAnswer } from "redux/slices/kingsBlessing/selection";
+import { submitRedAnswer, submitBlueAnswer, RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { Button } from "atoms";
 import useDice from "./useDice";
 import { colors } from "theme";
@@ -63,7 +63,7 @@ export default function Dice() {
 const radius = "20px";
 
 const styles = {
-  tab: (turn, expanded) => {
+  tab: (turn: RedOrBlue, expanded: boolean) => {
     const borderRadius =
       turn === "red"
         ? `border-top-left-radius: 50px; border-top-right-radius: 50px;`
@@ -88,7 +88,7 @@ const styles = {
     display: flex;
     justify-content: center;
   `,
-  positionWrapper: (turn, expanded) => css`
+  positionWrapper: (turn: RedOrBlue, expanded: boolean) => css`
     position: fixed;
     width: 100%;
     transition: opacity ease-in-out 200ms;
@@ -98,7 +98,7 @@ const styles = {
       opacity: 1;
     }
   `,
-  outerPlayAreaWrapper: (turn, expanded) => {
+  outerPlayAreaWrapper: (turn: RedOrBlue, expanded: boolean) => {
     const backgroundColor = turn === "red" ? colors.red : colors.blue;
     const borderRadius =
       turn === "red"
@@ -107,7 +107,7 @@ const styles = {
     return css`
       background-color: ${backgroundColor};
       width: 100%;
-      height ${expanded ? "300px" : "15vh"};
+      height: ${expanded ? "300px" : "15vh"};
       transition: height ease-in-out 200ms;
       ${borderRadius}
     `;
@@ -118,7 +118,7 @@ const styles = {
     align-items: center;
     height: 100%;
   `,
-  diceWrapper: expanded => css`
+  diceWrapper: (expanded: boolean) => css`
     display: flex;
     flex-direction: ${expanded ? "column" : "row"};
     height: ${expanded ? "200px" : "15vh"};

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { FieldType } from "redux/slices/kingsBlessing/selection";
+import { FieldType, RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";
 import {
@@ -15,7 +15,7 @@ import {
 } from "redux/slices/kingsBlessing/selection";
 import { kingsBlessingClickSound } from "audio";
 
-export function useFieldData(player: "red" | "blue" = "red", field?: FieldType) {
+export function useFieldData(player: RedOrBlue = "red", field: FieldType = "cows") {
   const dispatch = useDispatch();
 
   const turn = useSelector(selectTurn);
@@ -36,7 +36,7 @@ export function useFieldData(player: "red" | "blue" = "red", field?: FieldType) 
   const fieldData = allFieldData[field];
 
   const sliceClickCallback = useCallback(
-    field => access => {
+    (field: FieldType) => (access: [number, number]) => {
       if (player === turn) {
         kingsBlessingClickSound.play();
         if (player === "red") {

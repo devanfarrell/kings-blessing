@@ -1,9 +1,10 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
+import React from "react";
 
 interface props {
   children?: string;
-  onClick: Function;
+  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   disabled?: boolean;
 }
 
@@ -20,11 +21,7 @@ const styles = (disabled: boolean) => css`
   font-size: 2.5rem;
   padding: 0.7rem 1.7rem;
   border-radius: 3rem;
-  background: linear-gradient(
-    45deg,
-    rgba(83, 52, 245, 1),
-    rgba(156, 111, 255, 1)
-  );
+  background: linear-gradient(45deg, rgba(83, 52, 245, 1), rgba(156, 111, 255, 1));
   color: #fff;
   font-weight: 600;
   box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.15);

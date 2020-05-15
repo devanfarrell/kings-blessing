@@ -1,8 +1,8 @@
 import { createSlice, createSelector } from "redux-dogma";
-import { cloneDeep } from "lodash";
+import { RedOrBlue } from "./selection";
 
-export type GoldDie = 1 | 2 | 3 | 4 | 5 | 6 | null;
-export type PurpleDie = 1 | 2 | 4 | 8 | 10 | 12 | null;
+export type GoldDie = 1 | 2 | 3 | 4 | 5 | 6 | 0;
+export type PurpleDie = 1 | 2 | 4 | 8 | 10 | 12 | 0;
 
 export interface StateReducerStructure {
   turn: number;
@@ -14,57 +14,57 @@ export interface StateReducerStructure {
   haveRerolledPurpleDie: boolean;
 }
 
-const initialState: StateReducerStructure = {
+const initialState = (): StateReducerStructure => ({
   turn: 0,
   numerator: 0,
   denominator: 0,
-  goldDie: null,
-  purpleDie: null,
+  goldDie: 0,
+  purpleDie: 0,
   haveRerolledGoldDie: false,
   haveRerolledPurpleDie: false,
-};
+});
 
 function rollPurpleDie(): PurpleDie {
   const randomIndex = Math.round(Math.random() * 7776 - 1) % 6;
-  const purpleDie: Array<PurpleDie> = [1, 2, 4, 8, 10, 12];
+  const purpleDie: PurpleDie[] = [1, 2, 4, 8, 10, 12];
   return purpleDie[randomIndex];
 }
 
 function rollGoldDie(): GoldDie {
   const randomIndex = Math.round(Math.random() * 7776 - 1) % 6;
-  const goldDie: Array<GoldDie> = [1, 2, 3, 4, 5, 6];
+  const goldDie: GoldDie[] = [1, 2, 3, 4, 5, 6];
   return goldDie[randomIndex];
 }
 
-export const stateSlice = createSlice<StateReducerStructure>("state", cloneDeep(initialState));
+export const stateSlice = createSlice<StateReducerStructure>("state", initialState());
 
 /**
  * Actions
  */
 
-export const switchPlayers = stateSlice.createAction("switchTurns", draft => {
+export const switchPlayers = stateSlice.createSimpleAction("switchTurns", (draft: StateReducerStructure) => {
   const nextTurn = (draft.turn + 1) % 2;
-  Object.keys(draft).forEach(key => {
-    draft[key] = initialState[key];
-  });
+  Object.assign(draft, initialState());
   draft.turn = nextTurn;
   return;
 });
 
-export const rollDice = stateSlice.createAction("rollDice", draft => {
+export const rollDice = stateSlice.createSimpleAction("rollDice", (draft: StateReducerStructure) => {
   draft.goldDie = rollGoldDie();
   draft.purpleDie = rollPurpleDie();
-  if (draft.goldDie > draft.purpleDie) {
-    draft.numerator = draft.purpleDie;
-    draft.denominator = draft.goldDie;
-  } else {
-    draft.numerator = draft.goldDie;
-    draft.denominator = draft.purpleDie;
+  if (draft.goldDie != null && draft.purpleDie != null) {
+    if (draft.goldDie > draft.purpleDie) {
+      draft.numerator = draft.purpleDie;
+      draft.denominator = draft.goldDie;
+    } else {
+      draft.numerator = draft.goldDie;
+      draft.denominator = draft.purpleDie;
+    }
   }
   return;
 });
 
-export const rerollGoldDie = stateSlice.createAction("rerollGoldDie", draft => {
+export const rerollGoldDie = stateSlice.createSimpleAction("rerollGoldDie", (draft: StateReducerStructure) => {
   draft.haveRerolledGoldDie = true;
   draft.goldDie = rollGoldDie();
   if (draft.goldDie > draft.purpleDie) {
@@ -74,10 +74,11 @@ export const rerollGoldDie = stateSlice.createAction("rerollGoldDie", draft => {
     draft.numerator = draft.goldDie;
     draft.denominator = draft.purpleDie;
   }
+
   return;
 });
 
-export const rerollPurpleDie = stateSlice.createAction("rerollPurpleDie", draft => {
+export const rerollPurpleDie = stateSlice.createSimpleAction("rerollPurpleDie", (draft: StateReducerStructure) => {
   draft.haveRerolledPurpleDie = true;
   draft.purpleDie = rollPurpleDie();
   if (draft.goldDie > draft.purpleDie) {
@@ -87,6 +88,7 @@ export const rerollPurpleDie = stateSlice.createAction("rerollPurpleDie", draft 
     draft.numerator = draft.goldDie;
     draft.denominator = draft.purpleDie;
   }
+
   return;
 });
 
@@ -96,18 +98,24 @@ export const rerollPurpleDie = stateSlice.createAction("rerollPurpleDie", draft 
 
 export const selectState = stateSlice.selectState();
 
-export const selectTurn = createSelector([selectState], (state: StateReducerStructure): "blue" | "red" => {
-  return state.turn ? "blue" : "red";
-});
+export const selectTurn = createSelector(
+  [selectState],
+  (state: StateReducerStructure): RedOrBlue => {
+    return state.turn ? "blue" : "red";
+  }
+);
 
-export const selectGoldDie = createSelector<any, StateReducerStructure, GoldDie>([selectState], state => state.goldDie);
+export const selectGoldDie = createSelector<any, StateReducerStructure, GoldDie>(
+  [selectState],
+  (state) => state.goldDie
+);
 
 export const selectPurpleDie = createSelector<any, StateReducerStructure, PurpleDie>(
   [selectState],
-  state => state.purpleDie
+  (state) => state.purpleDie
 );
 
 export const selectHaveRerolled = createSelector<any, StateReducerStructure, { gold: boolean; purple: boolean }>(
   [selectState],
-  state => ({ gold: state.haveRerolledGoldDie, purple: state.haveRerolledPurpleDie })
+  (state) => ({ gold: state.haveRerolledGoldDie, purple: state.haveRerolledPurpleDie })
 );

@@ -1,14 +1,18 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { Fragment } from "react";
+import { Fragment, CSSProperties, ReactChild } from "react";
 import { useSelector } from "react-redux";
-import { selectGoldDie } from "redux/slices/kingsBlessing/state";
+import { selectGoldDie, GoldDie as IGoldDie, PurpleDie } from "redux/slices/kingsBlessing/state";
 
 function Dot() {
   return <div css={styles.dot} />;
 }
 
-function InternalDots({ value }) {
+interface InternalDotsProps {
+  value: IGoldDie | PurpleDie;
+}
+
+function InternalDots({ value }: InternalDotsProps) {
   switch (value) {
     case 1:
       return (
@@ -106,7 +110,11 @@ function InternalDots({ value }) {
   }
 }
 
-function Dots({ value }) {
+interface DotsProps {
+  value: IGoldDie | PurpleDie;
+}
+
+function Dots({ value }: DotsProps) {
   return (
     <div css={styles.wrapper(value == null)}>
       <InternalDots value={value} />
@@ -114,13 +122,12 @@ function Dots({ value }) {
   );
 }
 
-function Row(props) {
-  return (
-    <div css={styles.row} style={props.style}>
-      {props.children}
-    </div>
-  );
+interface RowProps {
+  style?: CSSProperties;
+  children?: ReactChild | ReactChild[];
 }
+
+const Row = (props: RowProps) => <div css={styles.row} {...props} />;
 
 export default function GoldDie() {
   const value = useSelector(selectGoldDie);
