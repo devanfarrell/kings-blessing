@@ -27,7 +27,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Install
       run: npm ci
-        env: NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_FONTAWESOME }}
+      env: 
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_FONTAWESOME }}
     - name: Build
       run: npm run build
     - name: Deploy
