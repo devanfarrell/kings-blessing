@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { css, jsx } from "@emotion/core";
-import { useCallback } from "react";
 import { Portal } from "components";
 import { RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { Button } from "atoms";
