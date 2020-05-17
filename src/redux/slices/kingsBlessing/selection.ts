@@ -117,14 +117,8 @@ const claimField = playerSelectionSlice.createAction<{ player: RedOrBlue; field:
 
 const rawSelector = playerSelectionSlice.selectState();
 
-export const redSelector = createSelector<any, ReducerStructure, Fields>(
-  [rawSelector],
-  (state: ReducerStructure) => state.red
-);
-export const blueSelector = createSelector<any, ReducerStructure, Fields>(
-  [rawSelector],
-  (state: ReducerStructure) => state.blue
-);
+export const redSelector = createSelector<any, ReducerStructure, Fields>([rawSelector], (reducer) => reducer.red);
+export const blueSelector = createSelector<any, ReducerStructure, Fields>([rawSelector], (reducer) => reducer.blue);
 
 export const selectRedKing = createSelector<any, Fields, Field>([redSelector], (state) => state.king);
 export const selectBlueKing = createSelector<any, Fields, Field>([blueSelector], (state) => state.king);
@@ -137,7 +131,7 @@ export const selectBlueField = createSelector<any, Fields, Fields>([blueSelector
 
 export const selectPresentationOrder = (): FieldType[] => presentationOrder;
 
-type ImplementationMatching = { implementationMatch: boolean; completedFields: FieldType[] };
+type ImplementationMatching = { implementationMatch: boolean; completedFields: ExtendedFieldType[] };
 
 export function genericImplementationMatch(
   fields: Fields,
@@ -145,11 +139,11 @@ export function genericImplementationMatch(
   denominator: number
 ): ImplementationMatching {
   let implementation: MathType = fraction(0, 1);
-  const modifiedFields: FieldType[] = [];
-  let completedFields: FieldType[] = [];
+  const modifiedFields: ExtendedFieldType[] = [];
+  let completedFields: ExtendedFieldType[] = [];
 
-  const entries = Object.entries(fields) as [FieldType, Field][];
-
+  const entries = Object.entries(fields) as [ExtendedFieldType, Field][];
+  console.debug(fields, completedFields);
   entries.forEach(([fieldKey, field]) => {
     field.forEach((circle) => {
       const circleNumerator = circle.reduce(selectionReduce, 0);
@@ -166,7 +160,7 @@ export function genericImplementationMatch(
 
   if (implementationMatch) {
     // check the modified fields. If any of them are complete, return it in an object called completed fields
-    const result: Array<FieldType | null> = modifiedFields.map((fieldType) =>
+    const result: Array<ExtendedFieldType | null> = modifiedFields.map((fieldType) =>
       fields[fieldType].every((circle) =>
         circle.every(
           (implementation) => implementation === Selection.finalized || implementation === Selection.selected
@@ -175,7 +169,7 @@ export function genericImplementationMatch(
         ? fieldType
         : null
     );
-    completedFields = result.filter((type) => type !== null) as FieldType[];
+    completedFields = result.filter((type) => type !== null) as ExtendedFieldType[];
   }
 
   return { implementationMatch, completedFields };
@@ -234,13 +228,25 @@ function genericSuccess(player: RedOrBlue) {
   kingsBlessingSuccessSound.play();
 }
 
-function* submitAbstraction(player: RedOrBlue, implementationMatch: ImplementationMatching) {
+function* submitAnswerAbstraction(player: RedOrBlue, implementationMatch: ImplementationMatching) {
   if (implementationMatch.implementationMatch) {
     if (implementationMatch.completedFields.length > 0) {
       const fields: ClaimedFields = yield effects.select(selectClaimedFields);
       let didClaimField: boolean = false;
       for (let i of implementationMatch.completedFields) {
-        if (fields[i] === null) {
+        if (i === "king") {
+          if (player === "red") {
+            toast.error(`You completed King's Blessing. You can reroll the gold die!`);
+          } else {
+            toast.info(`You completed King's Blessing. You can reroll the gold die!`);
+          }
+        } else if (i === "queen") {
+          if (player === "red") {
+            toast.error(`You completed Queen's Blessing. You can reroll the purple die!`);
+          } else {
+            toast.info(`You completed Queen's Blessing. You can reroll the purple die!`);
+          }
+        } else if (fields[i] === null) {
           didClaimField = true;
           yield effects.put(claimField({ player, field: i }));
           if (player === "red") {
@@ -275,10 +281,10 @@ function* submitAbstraction(player: RedOrBlue, implementationMatch: Implementati
 
 export const submitRedAnswer = playerSelectionSlice.createSideEffect("submitAnswerRed", function* () {
   const implementationMatch: ImplementationMatching = yield effects.select(selectDoesRedImplementationMatch);
-  yield submitAbstraction("red", implementationMatch);
+  yield submitAnswerAbstraction("red", implementationMatch);
 });
 
 export const submitBlueAnswer = playerSelectionSlice.createSideEffect("submitAnswerBlue", function* () {
   const implementationMatch: ImplementationMatching = yield effects.select(selectDoesBlueImplementationMatch);
-  yield submitAbstraction("blue", implementationMatch);
+  yield submitAnswerAbstraction("blue", implementationMatch);
 });
