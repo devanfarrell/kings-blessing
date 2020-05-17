@@ -3,10 +3,11 @@ import { css, jsx } from "@emotion/core";
 import { useSelector } from "react-redux";
 import Crown from "./crownSvg";
 import { selectOwnedFields } from "redux/slices/kingsBlessing/selection";
-import path from '../images/stone.jpg'
+import path from "../images/stone.jpg";
 
 export default function Center() {
   const owners = useSelector(selectOwnedFields);
+
   return (
     <div css={centerStyle}>
       <div css={crownSection}>

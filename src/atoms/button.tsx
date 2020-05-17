@@ -35,12 +35,10 @@ const styles = (disabled: boolean) => css`
     border-color: #ffffff;
     box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.25);
   }
-  ${disabled
-    ? `
-    border-color: rgba(113, 103, 135, 0.5); 
-    // background: rgba(147, 148, 152, 0.5);
+  ${disabled &&
+  css`
+    border-color: rgba(113, 103, 135, 0.5);
     background: linear-gradient(45deg, rgba(83, 52, 245, 0.5), rgba(156, 111, 255, 0.5));
     pointer-events: none;
-  `
-    : ``}
+  `}
 `;

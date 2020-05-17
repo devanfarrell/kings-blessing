@@ -1,5 +1,6 @@
 import { createSlice, createSelector } from "redux-dogma";
 import { RedOrBlue } from "./selection";
+import { NEW_GAME } from "./actions";
 
 export type GoldDie = 1 | 2 | 3 | 4 | 5 | 6 | 0;
 export type PurpleDie = 1 | 2 | 4 | 8 | 10 | 12 | 0;
@@ -41,6 +42,10 @@ export const stateSlice = createSlice<StateReducerStructure>("state", initialSta
 /**
  * Actions
  */
+
+stateSlice.addAction(NEW_GAME, (draft) => {
+  Object.assign(draft, initialState());
+});
 
 export const switchPlayers = stateSlice.createSimpleAction("switchTurns", (draft: StateReducerStructure) => {
   const nextTurn = (draft.turn + 1) % 2;

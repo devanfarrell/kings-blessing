@@ -4,6 +4,7 @@ import { fraction, add, compare, number, MathType } from "mathjs";
 import { toast } from "react-toastify";
 import { kingsBlessingFailSound, kingsBlessingSuccessSound } from "audio";
 import { selectionReduce, generateInitialState } from "./selectionHelpers";
+import { NEW_GAME } from "./actions";
 
 export enum Selection {
   unselected,
@@ -51,6 +52,10 @@ export const playerSelectionSlice = createSlice<ReducerStructure>("playerStructu
  * Actions
  *
  */
+
+playerSelectionSlice.addAction(NEW_GAME, (draft) => {
+  Object.assign(draft, generateInitialState());
+});
 
 interface updateAction {
   section: ExtendedFieldType;
@@ -143,7 +148,6 @@ export function genericImplementationMatch(
   let completedFields: ExtendedFieldType[] = [];
 
   const entries = Object.entries(fields) as [ExtendedFieldType, Field][];
-  console.debug(fields, completedFields);
   entries.forEach(([fieldKey, field]) => {
     field.forEach((circle) => {
       const circleNumerator = circle.reduce(selectionReduce, 0);
