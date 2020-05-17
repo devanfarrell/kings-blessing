@@ -11,32 +11,40 @@ export const globalStyles = css`
   }
 
   html {
-      font-size: 10px;
-      text-size-adject: 100%
-      text-rending: optimizeLegibility;
+    font-size: 10px;
+    text-size-adject: 100%;
+    text-rending: optimizeLegibility;
   }
 
   body {
-      font-size: 1.6rem;
-      font-weight: 400;
-      min-height: 100%;
-      margin: 0;
-      padding: 0;
+    font-size: 1.6rem;
+    font-weight: 400;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  *, :after, :before {
-      scrollbar-width: thin;
-      box-sizing: border-box;
+  *,
+  :after,
+  :before {
+    scrollbar-width: thin;
+    box-sizing: border-box;
   }
 
   :focus {
-      outline: none; // Because of this decision, all accessability must be done by hand
+    outline: none; // Because of this decision, all accessability must be done by hand
   }
 
   #modal-container {
-     position: absolute;
-     top: 0;
-     left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  #root {
+    min-width: 930px;
+    min-height: 650px;
+    height: 100vh;
   }
 `;
 

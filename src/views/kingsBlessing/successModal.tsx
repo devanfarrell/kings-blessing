@@ -72,8 +72,9 @@ const styles = {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    height: 100%;
+    width: 100%;
     position: absolute;
     left: 0;
     top: 0;

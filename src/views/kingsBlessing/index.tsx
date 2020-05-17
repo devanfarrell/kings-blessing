@@ -21,6 +21,6 @@ export default function KingsBlessing() {
 }
 
 const wrapper = css`
-  height: 100vh;
-  background-color: hotpink;
+  min-height: 100vh;
+  height: 100%;
 `;

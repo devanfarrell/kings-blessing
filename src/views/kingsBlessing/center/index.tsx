@@ -39,7 +39,7 @@ const centerStyle = css`
   flex-direction: row;
   height: 10%;
   background-color: #e5ddee;
-  background-size: 500px 500px;
+  background-size: 100px 100px;
   background-image: url(${path});
 `;
 
