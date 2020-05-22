@@ -2,25 +2,62 @@
 import { css, jsx } from "@emotion/core";
 import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import GoldDie from "./gold";
-import PurpleDie from "./purple";
+import { GoldDie, PurpleDie } from "./die";
 import { submitRedAnswer, submitBlueAnswer, RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { Button } from "atoms";
 import useDice from "./useDice";
 import { colors } from "theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { rerollGoldDie, rerollPurpleDie } from "redux/slices/kingsBlessing/state";
 
 export default function Dice() {
+  const { canRerollGold, canRerollPurple } = useDice();
   const [expanded, setExpanded] = useState(true);
+  const [purpleSelected, setPurpleSelected] = useState(false);
+  const [goldSelected, setGoldSelected] = useState(false);
   const dispatch = useDispatch();
   const { goldDie, purpleDie, turn, rollDice } = useDice();
+  const haveRolled = !!goldDie && !!purpleDie;
+  const rerollText = purpleSelected && goldSelected ? "Reroll Dice" : "Reroll Die";
+  const rollText = !haveRolled ? "Roll Dice" : purpleSelected || goldSelected ? rerollText : "Roll Dice";
   const endTurn = useCallback(() => {
     if (turn === "red") {
       dispatch(submitRedAnswer());
     } else {
       dispatch(submitBlueAnswer());
     }
-  }, [dispatch, turn]);
+    setPurpleSelected(false);
+    setGoldSelected(false);
+  }, [dispatch, turn, setPurpleSelected, setGoldSelected]);
+
+  const onPurpleDiceClick = useCallback(() => {
+    if (haveRolled && canRerollPurple) {
+      setPurpleSelected(!purpleSelected);
+    }
+  }, [haveRolled, canRerollPurple, setPurpleSelected, purpleSelected]);
+
+  const onGoldDiceClick = useCallback(() => {
+    if (haveRolled && canRerollGold) {
+      setGoldSelected(!goldSelected);
+    }
+  }, [haveRolled, canRerollGold, setGoldSelected, goldSelected]);
+
+  const onRollClick = useCallback(() => {
+    if (haveRolled) {
+      if (purpleSelected) {
+        dispatch(rerollPurpleDie());
+      }
+      if (goldSelected) {
+        dispatch(rerollGoldDie());
+      }
+    } else {
+      rollDice();
+    }
+    setPurpleSelected(false);
+    setGoldSelected(false);
+  }, [dispatch, rollDice, haveRolled, purpleSelected, goldSelected, setPurpleSelected, setGoldSelected]);
+
+  console.debug(haveRolled && !purpleSelected && !goldSelected);
   return (
     <div css={styles.positionWrapper(turn, expanded)}>
       {turn === "red" && (
@@ -33,17 +70,17 @@ export default function Dice() {
       <div css={styles.outerPlayAreaWrapper(turn, expanded)}>
         <div css={styles.innerPlayAreaWrapper}>
           <div>
-            <Button disabled={!!goldDie && !!purpleDie} onClick={rollDice}>
-              Roll Dice
+            <Button disabled={haveRolled && !purpleSelected && !goldSelected} onClick={onRollClick}>
+              {rollText}
             </Button>
           </div>
           <div css={styles.diceWrapper(expanded)}>
-            {purpleDie < goldDie && <PurpleDie />}
-            <GoldDie />
-            {purpleDie >= goldDie && <PurpleDie />}
+            {purpleDie < goldDie && <PurpleDie selected={purpleSelected} onClick={onPurpleDiceClick} />}
+            <GoldDie selected={goldSelected} onClick={onGoldDiceClick} />
+            {purpleDie >= goldDie && <PurpleDie selected={purpleSelected} onClick={onPurpleDiceClick} />}
           </div>
           <div>
-            <Button disabled={!goldDie && !purpleDie} onClick={endTurn}>
+            <Button disabled={!haveRolled} onClick={endTurn}>
               End Turn
             </Button>
           </div>
