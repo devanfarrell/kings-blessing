@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useSelector } from "react-redux";
 import Crown from "./crownSvg";
 import { selectOwnedFields } from "redux/slices/kingsBlessing/selection";

@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import Circle, { Slice } from "components/circle";
 import { useFieldData } from "../hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -46,7 +46,7 @@ export default function FieldSelection({ player, field, activeIndex, setActiveIn
             padding-right: 2px;
           `}
           color={colors.purple}
-          icon={["fad", "angle-left"]}
+          icon={"angle-left"}
           size="lg"
         />
       </div>
@@ -81,7 +81,7 @@ export default function FieldSelection({ player, field, activeIndex, setActiveIn
             padding-left: 2px;
           `}
           color={colors.purple}
-          icon={["fad", "angle-right"]}
+          icon={"angle-right"}
           size="lg"
         />
       </div>

@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import Circle, { Slice } from "components/circle";
 import { useSelector, useDispatch } from "react-redux";
 import { selectTurn } from "redux/slices/kingsBlessing/state";

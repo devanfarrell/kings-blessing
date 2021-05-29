@@ -1,22 +1,8 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
-import React from "react";
+/** @jsxImportSource @emotion/react */
+import styled from "@emotion/styled";
 
-interface props {
-  children?: string;
-  onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  disabled?: boolean;
-}
 
-export function Button({ children, onClick, disabled = false }: props) {
-  return (
-    <button onClick={onClick} css={styles(disabled)}>
-      {children}
-    </button>
-  );
-}
-
-const styles = (disabled: boolean) => css`
+export const Button = styled.button`
   box-sizing: content-box;
   font-size: 2.5rem;
   padding: 0.7rem 1.7rem;
@@ -31,14 +17,14 @@ const styles = (disabled: boolean) => css`
   outline: none;
   font-family: sans-serif;
   &:hover,
-  active {
+  &:active {
     border-color: #ffffff;
     box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.25);
   }
-  ${disabled &&
-  css`
-    border-color: rgba(113, 103, 135, 0.5);
+
+&:disabled {
+  border-color: rgba(113, 103, 135, 0.5);
     background: linear-gradient(45deg, rgba(83, 52, 245, 0.5), rgba(156, 111, 255, 0.5));
     pointer-events: none;
-  `}
-`;
+}
+`

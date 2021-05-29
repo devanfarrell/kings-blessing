@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { Fragment, CSSProperties, ReactChild } from "react";
 import { GoldDie as IGoldDie, PurpleDie as IPurpleDie } from "redux/slices/kingsBlessing/state";
 import useDice from "./useDice";

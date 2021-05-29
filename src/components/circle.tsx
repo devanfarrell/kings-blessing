@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { Fragment, CSSProperties } from "react";
 import { Selection, Field, RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { accessNestedArray } from "utility";

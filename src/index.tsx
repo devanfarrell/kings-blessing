@@ -2,7 +2,7 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 import KingsBlessing from "./views/kingsBlessing";
 import Provider from "./redux/provider";
-import { Global } from "@emotion/core";
+import { Global } from "@emotion/react";
 import "normalize.css";
 import { globalStyles } from "theme";
 import "./fontAwesome";

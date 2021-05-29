@@ -1,5 +1,5 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core";
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { GoldDie, PurpleDie } from "./die";
@@ -63,7 +63,7 @@ export default function Dice() {
       {turn === "red" && (
         <div css={styles.tabRow}>
           <div onClick={() => setExpanded(!expanded)} css={styles.tab(turn, expanded)}>
-            <FontAwesomeIcon color={colors.purple} icon={["fad", "angle-down"]} size="2x" />
+            <FontAwesomeIcon color={colors.purple} icon={"angle-down"} size="2x" />
           </div>
         </div>
       )}
@@ -89,7 +89,7 @@ export default function Dice() {
       {turn === "blue" && (
         <div css={styles.tabRow}>
           <div onClick={() => setExpanded(!expanded)} css={styles.tab(turn, expanded)}>
-            <FontAwesomeIcon color={colors.purple} icon={["fad", "angle-up"]} size="2x" />
+            <FontAwesomeIcon color={colors.purple} icon={"angle-up"} size="2x" />
           </div>
         </div>
       )}
