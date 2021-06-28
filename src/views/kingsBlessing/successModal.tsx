@@ -1,45 +1,44 @@
-/** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
+import { FC } from "react";
 import { Portal } from "components";
-import { RedOrBlue } from "redux/slices/kingsBlessing/selection";
 import { Button } from "atoms";
-import { newGame } from "redux/slices/kingsBlessing/actions";
-import { useDispatch } from "react-redux";
+import styled from "@emotion/styled";
+import { MachineDef, SendFunc } from "./stateMachine";
 
 interface Props {
-  isOpen: boolean;
-  winner: RedOrBlue;
+  machine: MachineDef;
+  send: SendFunc;
 }
 
-export default function SuccessModal({ isOpen, winner }: Props) {
-  const dispatch = useDispatch();
+export const SuccessModal: FC<Props> = ({ machine, send }) => {
+  const isOpen = ["p1Wins", "p2Wins"].some(machine.matches);
 
   if (!isOpen) return null;
+  const p1Wins = machine.matches("p1Wins");
   return (
     <Portal>
-      <div css={background}>
-        <div css={card}>
-          <div css={cardBody}>
+      <Background>
+        <Card>
+          <CardBody>
             <div>You're a whole lot of awesome</div>
-            <div>You win {winner}!</div>
+            <div>You win {p1Wins ? "Red" : "Blue"}!</div>
             <Button
               onClick={() => {
-                dispatch(newGame());
+                send({ type: "NEW_GAME" });
               }}
             >
               New Game
             </Button>
-          </div>
-        </div>
-      </div>
+          </CardBody>
+        </Card>
+      </Background>
     </Portal>
   );
-}
+};
 
 const padding = "20px";
 const borderRadius = "3px";
 
-const background = css`
+const Background = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -50,7 +49,7 @@ const background = css`
   top: 0;
 `;
 
-const card = css`
+const Card = styled.div`
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -61,7 +60,7 @@ const card = css`
   box-shadow: 0 1px 5px rgba(0, 3, 10, 0.1), 0 4px 5px -3px rgba(0, 3, 10, 0.24);
 `;
 
-const cardBody = css`
+const CardBody = styled.div`
   padding: ${padding};
   font-size: 2.4rem;
   font-family: sans-serif;
