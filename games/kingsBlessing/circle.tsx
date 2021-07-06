@@ -1,6 +1,6 @@
 import { CSSProperties, FC } from "react";
 
-import { colors } from "theme";
+import { colors } from "./theme";
 import styled from "@emotion/styled";
 import { Selection, Player, ExtendedFieldType } from "./stateMachineUtils";
 import { MachineDef, SendFunc } from "./stateMachine";

@@ -11,12 +11,13 @@
     "@xstate/immer": "^0.2.0",
     "@xstate/inspect": "^0.4.1",
     "@xstate/react": "^1.3.4",
+    "immer": "^9.0.3",
     "mathjs": "^9.4.1",
+    "next": "^11.0.1",
     "normalize.css": "^8.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "^4.0.0",
-    "react-toastify": "^5.5.0",
+    "react-hot-toast": "^2.0.0",
     "typescript": "^4.3.2",
     "uifx": "^2.0.7",
     "xstate": "^4.20.0"
@@ -24,13 +25,16 @@
   "devDependencies": {
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
+    "eslint": "7.29.0",
+    "eslint-config-next": "11.0.1",
     "prettier": "^2.0.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "deploy:github": "npm run build && node ./deploy-github"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "deploy:github": "yarn run build && node ./deploy-github"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,7 +1,7 @@
 import { useState, FC } from "react";
 import { GoldDie, PurpleDie } from "./die";
-import { Button } from "atoms";
-import { colors } from "theme";
+import { Button } from "../../components";
+import { colors } from "./theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MachineDef, SendFunc } from "./stateMachine";
 import styled from "@emotion/styled";

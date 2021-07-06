@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { FieldType, Player } from "./stateMachineUtils";
 import { MachineDef, SendFunc } from "./stateMachine";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { colors } from "theme";
+import { colors } from "./theme";
 import { Circle } from "./circle";
 
 type FieldProps = {
@@ -83,7 +83,6 @@ const PlayBlock = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 5px 15px;
-  height: 100%;
 `;
 
 const SelectionWrapper = styled.div`
@@ -103,4 +102,5 @@ const ArrowButton = styled.button`
   height: 30px;
   background-color: white;
   border-radius: 30px;
+  border: none;
 `;

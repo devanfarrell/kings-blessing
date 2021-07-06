@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { colors } from "theme";
+import { colors } from "./theme";
 import { Owner } from "./stateMachineUtils";
 import styled from "@emotion/styled";
 

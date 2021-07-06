@@ -15,14 +15,15 @@ import {
   PurpleDie,
   Field,
 } from "./stateMachineUtils";
-import { inspect } from "@xstate/inspect";
 import { assign } from "@xstate/immer";
 import { add, compare, fraction, MathType, number } from "mathjs";
+import { fireSuccessToast, fireFailToast } from "./toasts";
+import UIFx from "uifx";
 
-inspect({
-  url: "https:statecharts.io/inspect",
-  iframe: false,
-});
+// inspect({
+//   url: "https:statecharts.io/inspect",
+//   iframe: false,
+// });
 
 export const selectionReduce = (accumulator: Selection, currentValue: number) =>
   currentValue === Selection.SELECTED ? accumulator + 1 : accumulator;
@@ -32,6 +33,9 @@ export type Context = {
   p1Data: Fields;
   p2Data: Fields;
   claimedFields: Record<FieldType, Owner>;
+  clickSound?: UIFx;
+  successSound?: UIFx;
+  failSound?: UIFx;
 };
 
 type States = {
@@ -194,11 +198,14 @@ const toggleSliceBase: TransitionConfigOrTarget<Context, ToggleSliceAction> = {
   target: "hasRolled",
   actions: assign((ctx, event) => {
     const { field, circleIndex, cellIndex, player } = event;
+
     const playerData = player === Player.P1 ? ctx.p1Data : ctx.p2Data;
     const currentState = playerData[field][circleIndex][cellIndex];
     if (currentState !== Selection.DISABLED && currentState !== Selection.FINALIZED) {
       playerData[field][circleIndex][cellIndex] =
         currentState === Selection.SELECTED ? Selection.UNSELECTED : Selection.SELECTED;
+
+      ctx.clickSound?.play();
     }
   }),
 };
@@ -265,7 +272,15 @@ export const kingsBlessingMachine = Machine<Context, States, Events>({
       on: {
         NEW_GAME: {
           target: "p1",
-          actions: assign(resetGame),
+          actions: [
+            assign(resetGame),
+            assign((ctx) => {
+              // add audio
+              if (!ctx.clickSound) ctx.clickSound = new UIFx("/audio/kings_blessing_tick.mp3", { volume: 0.4 });
+              if (!ctx.failSound) ctx.failSound = new UIFx("/audio/kings_blessing_fail.wav", { volume: 0.4 });
+              if (!ctx.successSound) ctx.successSound = new UIFx("/audio/kings_blessing_success.wav", { volume: 0.4 });
+            }),
+          ],
         },
       },
     },
@@ -292,9 +307,26 @@ export const kingsBlessingMachine = Machine<Context, States, Events>({
               {
                 target: "submitted",
                 cond: playerOneCorrectSelection,
-                actions: [resetContextTurnData, finalizeAnswers],
+                actions: [
+                  resetContextTurnData,
+                  finalizeAnswers,
+                  (ctx) => {
+                    fireSuccessToast(Player.P1);
+                    ctx.successSound?.play();
+                  },
+                ],
               },
-              { target: "submitted", actions: [resetContextTurnData, clearAnswers] },
+              {
+                target: "submitted",
+                actions: [
+                  resetContextTurnData,
+                  clearAnswers,
+                  (ctx) => {
+                    fireFailToast(Player.P2);
+                    ctx.failSound?.play();
+                  },
+                ],
+              },
             ],
           },
         },
@@ -319,9 +351,26 @@ export const kingsBlessingMachine = Machine<Context, States, Events>({
               {
                 target: "submitted",
                 cond: playerTwoCorrectSelection,
-                actions: [resetContextTurnData, finalizeAnswers],
+                actions: [
+                  resetContextTurnData,
+                  finalizeAnswers,
+                  (ctx) => {
+                    fireSuccessToast(Player.P2);
+                    ctx.successSound?.play();
+                  },
+                ],
               },
-              { target: "submitted", actions: [resetContextTurnData, clearAnswers] },
+              {
+                target: "submitted",
+                actions: [
+                  resetContextTurnData,
+                  clearAnswers,
+                  (ctx) => {
+                    fireFailToast(Player.P2);
+                    ctx.failSound?.play();
+                  },
+                ],
+              },
             ],
           },
         },

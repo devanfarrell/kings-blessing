@@ -1,7 +1,8 @@
-import { useRef, useLayoutEffect, memo } from "react";
+import { FC } from "react";
+import { useRef, useLayoutEffect } from "react";
 import ReactDOM from "react-dom";
 
-const Portal = memo(({ children }) => {
+export const Portal: FC = ({ children }) => {
   const el = useRef(document.createElement("div"));
 
   useLayoutEffect(() => {
@@ -16,6 +17,4 @@ const Portal = memo(({ children }) => {
   }, []);
 
   return ReactDOM.createPortal(children, el.current);
-});
-
-export default Portal;
+};

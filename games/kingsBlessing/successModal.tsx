@@ -1,6 +1,5 @@
 import { FC } from "react";
-import { Portal } from "components";
-import { Button } from "atoms";
+import { Portal, Button } from "../../components";
 import styled from "@emotion/styled";
 import { MachineDef, SendFunc } from "./stateMachine";
 
