@@ -2,7 +2,7 @@ import { FC } from "react";
 import styled from "@emotion/styled";
 import { toast } from "react-hot-toast";
 import { keyframes } from "@emotion/react";
-import { Player } from "./stateMachineUtils";
+import { Player } from "./types";
 
 const enter = keyframes`
     0% {
