@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { colors } from "./theme";
-import { Owner } from "./stateMachineUtils";
+import { Owner } from "./types";
 import styled from "@emotion/styled";
 
 export const Crown: FC<{ owner: Owner }> = ({ owner }) => {

@@ -3,8 +3,9 @@ import { GoldDie, PurpleDie } from "./die";
 import { Button } from "../../components";
 import { colors } from "./theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MachineDef, SendFunc } from "./stateMachine";
 import styled from "@emotion/styled";
+
+import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 export const Dice: FC<{ machine: MachineDef; send: SendFunc }> = ({ machine, send }) => {
   const [expanded, setExpanded] = useState(true);

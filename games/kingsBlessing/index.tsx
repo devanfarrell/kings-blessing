@@ -1,10 +1,8 @@
 import { FC } from "react";
 import styled from "@emotion/styled";
-// import lace from "/images/lace.svg";
-// import path from "./images/stone.jpg";
 import { Crown } from "./crown";
-import { kingsBlessingMachine } from "./stateMachine";
-import { presentationOrder, Player } from "./stateMachineUtils";
+import { kingsBlessingMachine } from "./kings-blessing.machine";
+import { presentationOrder, Player } from "./types";
 import { useMachine } from "@xstate/react";
 import { Circle } from "./circle";
 import { Field } from "./field";
@@ -13,7 +11,7 @@ import { SuccessModal } from "./successModal";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas, faCheckSquare, faTimes, faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { css, Global } from "@emotion/react";
-import '@fortawesome/fontawesome-svg-core/styles.css';
+import "@fortawesome/fontawesome-svg-core/styles.css";
 
 library.add(fas, faCheckSquare, faTimes, faAngleDown, faAngleUp);
 

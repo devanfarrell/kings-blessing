@@ -2,8 +2,8 @@ import { CSSProperties, FC } from "react";
 
 import { colors } from "./theme";
 import styled from "@emotion/styled";
-import { Selection, Player, ExtendedFieldType } from "./stateMachineUtils";
-import { MachineDef, SendFunc } from "./stateMachine";
+import { Selection, Player, ExtendedFieldType } from "./types";
+import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 const getColor = (selection: Selection, player: Player) => {
   if (selection === Selection.DISABLED) return "grey";

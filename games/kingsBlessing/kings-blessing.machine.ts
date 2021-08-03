@@ -1,24 +1,21 @@
 import { Machine, send, State, StateNodeConfig, TransitionConfigOrTarget } from "xstate";
+import { resetGame, resetTurnData, rollGoldDie, rollPurpleDie } from "./stateMachineUtils";
+import { assign } from "@xstate/immer";
+import { add, compare, fraction, MathType, number } from "mathjs";
+import { fireSuccessToast, fireFailToast } from "./toasts";
+import UIFx from "uifx";
 import {
   ExtendedFieldType,
   Fields,
   FieldType,
   Owner,
   Player,
-  resetGame,
-  resetTurnData,
-  rollGoldDie,
-  rollPurpleDie,
   TurnData,
   Selection,
   GoldDie,
   PurpleDie,
   Field,
-} from "./stateMachineUtils";
-import { assign } from "@xstate/immer";
-import { add, compare, fraction, MathType, number } from "mathjs";
-import { fireSuccessToast, fireFailToast } from "./toasts";
-import UIFx from "uifx";
+} from "./types";
 
 // inspect({
 //   url: "https:statecharts.io/inspect",
@@ -290,9 +287,9 @@ export const kingsBlessingMachine = Machine<Context, States, Events>({
         preRoll,
         hasRolled: {
           on: {
-            ROLL_DICE,
-            TOGGLE_PURPLE_DIE_SELECTION,
-            TOGGLE_GOLD_DIE_SELECTION,
+            ROLL_DICE: ROLL_DICE,
+            TOGGLE_PURPLE_DIE_SELECTION: TOGGLE_PURPLE_DIE_SELECTION,
+            TOGGLE_GOLD_DIE_SELECTION: TOGGLE_GOLD_DIE_SELECTION,
             TOGGLE_SLICE: { ...toggleSliceBase, cond: isPlayerOne },
             // SPECIAL: {
             //   actions: assign((ctx) => {
@@ -343,9 +340,9 @@ export const kingsBlessingMachine = Machine<Context, States, Events>({
         preRoll,
         hasRolled: {
           on: {
-            ROLL_DICE,
-            TOGGLE_PURPLE_DIE_SELECTION,
-            TOGGLE_GOLD_DIE_SELECTION,
+            ROLL_DICE: ROLL_DICE,
+            TOGGLE_PURPLE_DIE_SELECTION: TOGGLE_PURPLE_DIE_SELECTION,
+            TOGGLE_GOLD_DIE_SELECTION: TOGGLE_GOLD_DIE_SELECTION,
             TOGGLE_SLICE: { ...toggleSliceBase, cond: isPlayerTwo },
             SUBMIT: [
               {

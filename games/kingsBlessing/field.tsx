@@ -1,10 +1,11 @@
 import { FC, useState } from "react";
 import styled from "@emotion/styled";
-import { FieldType, Player } from "./stateMachineUtils";
-import { MachineDef, SendFunc } from "./stateMachine";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { colors } from "./theme";
 import { Circle } from "./circle";
+import { FieldType, Player } from "./types";
+
+import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 type FieldProps = {
   field: FieldType;

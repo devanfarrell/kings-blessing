@@ -1,7 +1,8 @@
 import { FC } from "react";
-import { GoldDie as IGoldDie } from "./stateMachineUtils";
 import styled from "@emotion/styled";
-import { MachineDef, SendFunc } from "./stateMachine";
+
+import type { GoldDie as IGoldDie } from "./types";
+import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 interface InternalDotsProps {
   value: IGoldDie;

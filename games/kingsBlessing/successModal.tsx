@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Portal, Button } from "../../components";
 import styled from "@emotion/styled";
-import { MachineDef, SendFunc } from "./stateMachine";
+import { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 interface Props {
   machine: MachineDef;
