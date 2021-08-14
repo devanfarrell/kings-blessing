@@ -7,8 +7,8 @@ import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 
 const getColor = (selection: Selection, player: Player) => {
   if (selection === Selection.DISABLED) return "grey";
-  if (selection === Selection.FINALIZED) return player === Player.P1 ? colors.red : colors.blue;
-  if (selection === Selection.SELECTED) return player === Player.P1 ? colors.lightRed : colors.lightBlue;
+  if (selection === Selection.FINALIZED) return player === Player.P1 ? colors.orange : colors.blue;
+  if (selection === Selection.SELECTED) return player === Player.P1 ? colors.lightOrange : colors.lightBlue;
   return "white";
 };
 

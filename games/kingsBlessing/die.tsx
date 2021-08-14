@@ -119,7 +119,8 @@ export const GoldDie: FC<DieInterface> = ({ machine, send }) => {
   return (
     <Border canReroll={canReroll} selected={selected} onClick={() => send({ type: "TOGGLE_GOLD_DIE_SELECTION" })}>
       <Background uninitialized={value == null} className="gold">
-        <InternalDots value={value} />
+        <OutsetGold>{value || 1}</OutsetGold>
+        <Inset>{value || 1}</Inset>
       </Background>
     </Border>
   );
@@ -132,7 +133,7 @@ export const PurpleDie: FC<DieInterface> = ({ machine, send }) => {
   return (
     <Border canReroll={canReroll} selected={selected} onClick={() => send({ type: "TOGGLE_PURPLE_DIE_SELECTION" })}>
       <Background uninitialized={value == null} className="purple">
-        <Outset>{value || 1}</Outset>
+        <OutsetPurple>{value || 1}</OutsetPurple>
         <Inset>{value || 1}</Inset>
       </Background>
     </Border>
@@ -145,10 +146,17 @@ const Inset = styled.div`
   line-height: 0px;
 `;
 
-const Outset = styled.div`
+const OutsetPurple = styled.div`
   font: bold 50px arial, sans-serif;
   color: transparent;
   text-shadow: -1px -1px 2px hsla(262, 50%, 24%, 0.8);
+  line-height: 0px;
+`;
+
+const OutsetGold = styled.div`
+  font: bold 50px arial, sans-serif;
+  color: transparent;
+  text-shadow: -1px -1px 2px hsl(41, 50%, 34%, 0.8);
   line-height: 0px;
 `;
 

@@ -111,7 +111,7 @@ const DiceWrapper = styled.div<{ expanded: boolean }>`
 `;
 
 const OuterPlayAreaWrapper = styled.div<StyleProps>`
-  background-color: ${(p) => (p.playerOne ? colors.red : colors.blue)};
+  background-color: ${(p) => (p.playerOne ? colors.orange : colors.blue)};
   width: 100%;
   height: ${(p) => (p.expanded ? "300px" : "15vh")};
   transition: height ease-in-out 200ms;
