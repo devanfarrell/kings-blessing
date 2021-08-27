@@ -9,4 +9,5 @@ export const colors = {
   purple: "hsl(261, 60%, 39%)",
   orange: "#ffa500",
   lightOrange: "#ffdb9a",
+  white: "#FFF",
 };

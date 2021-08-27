@@ -6,9 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styled from "@emotion/styled";
 
 import type { MachineDef, SendFunc } from "./kings-blessing.machine";
+import { useMachine } from "@xstate/react";
+import { SettingsMachine } from "../../machines/settings.machine";
 
 export const Dice: FC<{ machine: MachineDef; send: SendFunc }> = ({ machine, send }) => {
   const [expanded, setExpanded] = useState(true);
+  const [settingsMachine] = useMachine(SettingsMachine);
+  const { context: settings } = settingsMachine;
   const haveRolled = [{ p1: "hasRolled" }, { p2: "hasRolled" }].some(machine.matches);
   const { purpleDieSelected, goldDieSelected, goldDie, purpleDie } = machine.context.turnData;
   const rerollText = purpleDieSelected && goldDieSelected ? "Reroll Dice" : "Reroll Die";
@@ -28,7 +32,7 @@ export const Dice: FC<{ machine: MachineDef; send: SendFunc }> = ({ machine, sen
         </TabRow>
       )}
       <OuterPlayAreaWrapper playerOne={playerOneTurn} expanded={expanded}>
-        <InnerPlayAreaWrapper>
+        <InnerPlayAreaWrapper rotated={!playerOneTurn && settings.tabletop}>
           <div>
             <Button disabled={haveRolled && !purpleDieSelected && !goldDieSelected} onClick={onRollClick}>
               {rollText}
@@ -97,6 +101,7 @@ const PositionWrapper = styled.div<StyleProps>`
   &:hover {
     opacity: 1;
   }
+  z-index: 1;
 `;
 
 const DiceWrapper = styled.div<{ expanded: boolean }>`
@@ -121,9 +126,10 @@ const OuterPlayAreaWrapper = styled.div<StyleProps>`
       : `border-bottom-left-radius: ${radius}; border-bottom-right-radius: ${radius};`}
 `;
 
-const InnerPlayAreaWrapper = styled.div`
+const InnerPlayAreaWrapper = styled.div<{ rotated?: boolean }>`
   display: flex;
   justify-content: space-evenly;
   align-items: center;
   height: 100%;
+  transform: rotate(${(p) => (p.rotated ? "180deg" : "0deg")});
 `;

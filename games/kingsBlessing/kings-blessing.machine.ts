@@ -16,11 +16,14 @@ import {
   PurpleDie,
   Field,
 } from "./types";
+// import { inspect } from "@xstate/inspect";
 
-// inspect({
-//   url: "https:statecharts.io/inspect",
-//   iframe: false,
-// });
+// if (typeof window !== "undefined") {
+//   inspect({
+//     url: "https:statecharts.io/inspect",
+//     iframe: false,
+//   });
+// }
 
 export const selectionReduce = (accumulator: Selection, currentValue: number) =>
   currentValue === Selection.SELECTED ? accumulator + 1 : accumulator;
@@ -262,6 +265,7 @@ const clearAnswers = assign((ctx: Context, _event: any) => {
 export const kingsBlessingMachine = Machine<Context, States, Events>({
   id: "KINGS_BLESSING_MACHINE",
   initial: "start",
+  strict: true,
   context: resetGame(),
   states: {
     start: {

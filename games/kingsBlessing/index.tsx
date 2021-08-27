@@ -12,6 +12,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas, faCheckSquare, faTimes, faAngleDown, faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { css, Global } from "@emotion/react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { SettingsMachine } from "../../machines/settings.machine";
 
 library.add(fas, faCheckSquare, faTimes, faAngleDown, faAngleUp);
 
@@ -22,7 +23,9 @@ const globalStyles = css`
 `;
 
 const KingsBlessing: FC = () => {
-  const [machine, send] = useMachine(kingsBlessingMachine);
+  const [machine, send] = useMachine(kingsBlessingMachine, { devTools: true });
+  const [settingsMachine] = useMachine(SettingsMachine);
+  const { context: settings } = settingsMachine;
 
   return (
     <>
@@ -75,7 +78,7 @@ const KingsBlessing: FC = () => {
           ))}
         </PlayArea>
 
-        <Edge>
+        <Edge rotated={settings.tabletop}>
           <ThreeParts>
             <OneThird>
               <PartTitle>King's Blessing</PartTitle>
@@ -142,11 +145,12 @@ const ThreeParts = styled.div`
   background-image: url(/images/lace.svg);
 `;
 
-const Edge = styled.div`
+const Edge = styled.div<{ rotated?: boolean }>`
   height: 15%;
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
+  transform: rotate(${(p) => (p.rotated ? "180deg" : "0deg")});
 `;
 
 const Center = styled.div`

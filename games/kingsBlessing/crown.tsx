@@ -4,7 +4,7 @@ import { Owner } from "./types";
 import styled from "@emotion/styled";
 
 export const Crown: FC<{ owner: Owner }> = ({ owner }) => {
-  const redBlue = owner === Owner.P1 ? colors.red : colors.blue;
+  const redBlue = owner === Owner.P1 ? colors.orange : colors.blue;
   const color = owner === Owner.UNOWNED ? colors.purple : redBlue;
 
   return (
