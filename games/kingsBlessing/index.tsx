@@ -140,7 +140,7 @@ const ThreeParts = styled.div`
   flex-direction: row;
   width: 300%;
   flex: 1 1 auto;
-  background-color: #e5ddee;
+  background-color: #faf8fc;
   background-size: 700px 700px;
   background-image: url(/images/lace.svg);
 `;
@@ -158,8 +158,8 @@ const Center = styled.div`
   flex-direction: row;
   height: 10%;
   background-color: #e5ddee;
-  background-size: 100px 100px;
-  background-image: url(/images/stone.jpg);
+  background-size: 32px 32px;
+  background-image: url(/images/tile.png);
 `;
 
 const RoyalCirclesWrapper = styled.div`
@@ -179,4 +179,6 @@ const PlayArea = styled.div`
   flex-direction: row;
   height: 30%;
   background-color: rgb(147, 167, 84);
+  background-size: 32px 32px;
+  background-image: url(/images/grass.png);
 `;
