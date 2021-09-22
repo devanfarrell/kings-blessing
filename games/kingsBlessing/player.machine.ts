@@ -57,7 +57,7 @@ export type PlayerSendFunc = (event: Events) => any;
 
 const initializationUtil = (circleCount: number, fraction: number): Selection[][] => {
   const tempArray = new Array(circleCount).fill(0);
-  return tempArray.map(() => new Array(fraction).fill(Selection.FINALIZED));
+  return tempArray.map(() => new Array(fraction).fill(Selection.UNSELECTED));
 };
 
 const resetFields = (): Fields => ({
