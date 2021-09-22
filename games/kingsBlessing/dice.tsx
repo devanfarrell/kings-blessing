@@ -5,26 +5,31 @@ import { colors } from "./theme";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styled from "@emotion/styled";
 
-import type { MachineDef, SendFunc } from "./kings-blessing.machine";
 import { useMachine } from "@xstate/react";
 import { SettingsMachine } from "../../machines/settings.machine";
+import { Player } from "./types";
+import { PlayerMachineDef, PlayerSendFunc } from "./player.machine";
 
-export const Dice: FC<{ machine: MachineDef; send: SendFunc }> = ({ machine, send }) => {
+export const Dice: FC<{ machine: PlayerMachineDef; send: PlayerSendFunc; player: Player }> = ({
+  machine,
+  send,
+  player,
+}) => {
   const [expanded, setExpanded] = useState(true);
   const [settingsMachine] = useMachine(SettingsMachine);
   const { context: settings } = settingsMachine;
-  const haveRolled = [{ p1: "hasRolled" }, { p2: "hasRolled" }].some(machine.matches);
+  const haveRolled = machine.matches("takingTurn");
   const { purpleDieSelected, goldDieSelected, goldDie, purpleDie } = machine.context.turnData;
   const rerollText = purpleDieSelected && goldDieSelected ? "Reroll Dice" : "Reroll Die";
   const rollText = !haveRolled ? "Roll Dice" : rerollText;
 
   const onRollClick = () => send({ type: "ROLL_DICE" });
 
-  const playerOneTurn = machine.matches("p1");
+  const playerOneTurn = player === Player.P1;
 
   return (
     <PositionWrapper playerOne={playerOneTurn} expanded={expanded}>
-      {playerOneTurn && (
+      {player === Player.P1 && (
         <TabRow>
           <Tab playerOne expanded={expanded} onClick={() => setExpanded(!expanded)}>
             <FontAwesomeIcon color={colors.purple} icon={"angle-up"} size="2x" />
@@ -50,7 +55,7 @@ export const Dice: FC<{ machine: MachineDef; send: SendFunc }> = ({ machine, sen
           </div>
         </InnerPlayAreaWrapper>
       </OuterPlayAreaWrapper>
-      {machine.matches("p2") && (
+      {player === Player.P2 && (
         <TabRow>
           <Tab playerOne={false} expanded={expanded} onClick={() => setExpanded(!expanded)}>
             <FontAwesomeIcon color={colors.purple} icon={"angle-up"} size="2x" />

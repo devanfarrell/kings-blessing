@@ -1,395 +1,197 @@
-import { Machine, send, State, StateNodeConfig, TransitionConfigOrTarget } from "xstate";
-import { resetGame, resetTurnData, rollGoldDie, rollPurpleDie } from "./stateMachineUtils";
-import { assign } from "@xstate/immer";
-import { add, compare, fraction, MathType, number } from "mathjs";
-import { fireSuccessToast, fireFailToast } from "./toasts";
-import UIFx from "uifx";
-import {
-  ExtendedFieldType,
-  Fields,
-  FieldType,
-  Owner,
-  Player,
-  TurnData,
-  Selection,
-  GoldDie,
-  PurpleDie,
-  Field,
-} from "./types";
-// import { inspect } from "@xstate/inspect";
+import { send, State, createMachine, MachineConfig, actions, spawn, StateMachine } from "xstate";
 
-// if (typeof window !== "undefined") {
-//   inspect({
-//     url: "https:statecharts.io/inspect",
-//     iframe: false,
-//   });
-// }
+import { SpawnedPlayerMachine, kingsBlessingActor } from "./player.machine";
+
+import UIFx from "uifx";
+import { FieldType, Owner, Player, Selection, fieldPresentationOrder } from "./types";
+import { MachineEvent } from "../../types";
+import { inspect } from "@xstate/inspect";
+import { assign } from "@xstate/immer";
+
+if (typeof window !== "undefined") {
+  inspect({
+    url: "https:statecharts.io/inspect",
+    iframe: false,
+  });
+}
 
 export const selectionReduce = (accumulator: Selection, currentValue: number) =>
   currentValue === Selection.SELECTED ? accumulator + 1 : accumulator;
 
+const getClaimedFields = (): Record<FieldType, Owner> => ({
+  cows: Owner.UNOWNED,
+  wheat: Owner.UNOWNED,
+  lumber: Owner.UNOWNED,
+  pigs: Owner.UNOWNED,
+  fruit: Owner.UNOWNED,
+  water: Owner.UNOWNED,
+  wool: Owner.UNOWNED,
+});
+
 export type Context = {
-  turnData: TurnData;
-  p1Data: Fields;
-  p2Data: Fields;
   claimedFields: Record<FieldType, Owner>;
-  clickSound?: UIFx;
+  [Player.P1]?: SpawnedPlayerMachine;
+  [Player.P2]?: SpawnedPlayerMachine;
   successSound?: UIFx;
-  failSound?: UIFx;
 };
 
-type States = {
+type StateSchema = {
   states: {
     start: {};
-    p1: PlayerMachineState;
-    p1Wins: {};
-    p2: PlayerMachineState;
-    p2Wins: {};
+    playing: {
+      states: {
+        [Player.P1]: {};
+        [Player.P2]: {};
+        p1Wins: {};
+        p2Wins: {};
+      };
+    };
   };
 };
 
-type ToggleSliceAction = {
-  type: `TOGGLE_SLICE`;
-  field: ExtendedFieldType;
-  circleIndex: number;
-  cellIndex: number;
-  player: Player;
-};
+type Typestate =
+  | {
+      value: "start";
+      context: Context & {
+        [Player.P1]: undefined;
+        [Player.P2]: undefined;
+        successSound: undefined;
+      };
+    }
+  | {
+      value: "playing";
+      context: Context & {
+        [Player.P1]: SpawnedPlayerMachine;
+        [Player.P2]: SpawnedPlayerMachine;
+        successSound: UIFx;
+      };
+    }
+  | { value: "playing.p1Wins"; context: Context }
+  | { value: "playing.p2Wins"; context: Context };
 
-export type Events =
-  | { type: "SUBMIT" }
-  | { type: "NEW_GAME" }
-  | { type: "ROLL_DICE" }
-  | ToggleSliceAction
-  | { type: "TOGGLE_PURPLE_DIE_SELECTION" }
-  | { type: "TOGGLE_GOLD_DIE_SELECTION" };
-// | { type: "SPECIAL" };
+export type EndTurnEvent = MachineEvent<"END_TURN", { completedFields: FieldType[] }>;
 
-export type MachineDef = State<Context, Events, States>;
+export type Events = MachineEvent<"NEW_GAME"> | EndTurnEvent;
+
+export type MachineDef = State<Context, Events, StateSchema, Typestate>;
 export type SendFunc = (event: Events) => any;
-
-const assignDice = (ctx: Context, goldDie: GoldDie, purpleDie: PurpleDie): void => {
-  const [numerator, denominator] = goldDie < purpleDie ? [goldDie, purpleDie] : [purpleDie, goldDie];
-  ctx.turnData.goldDie = goldDie;
-  ctx.turnData.purpleDie = purpleDie;
-  ctx.turnData.numerator = numerator;
-  ctx.turnData.denominator = denominator;
-};
-
-type PlayerMachineState = {
-  states: {
-    preRoll: {};
-    hasRolled: {};
-    submitted: {};
-  };
-};
 
 /**
  * Guards
  */
 
-const canRerollPurpleDie = (ctx: Context) => ctx.turnData.canRerollPurpleDie;
-const canRerollGoldDie = (ctx: Context) => ctx.turnData.canRerollGoldDie;
-
-const isPlayerOne = (_ctx: Context, event: ToggleSliceAction) => event.player === Player.P1;
-const isPlayerTwo = (_ctx: Context, event: ToggleSliceAction) => event.player === Player.P2;
-
-const playerOneWins = (ctx: Context) => {
-  const total = Object.values(ctx.claimedFields).reduce((acc, current) => (current === Owner.P1 ? acc++ : acc), 0);
-  return total >= 4;
+const playerOneWins = (ctx: Context, event: EndTurnEvent): boolean => {
+  const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
+  const newlyClaimedFields = unclaimedFields.filter((field) => event.completedFields.includes(field));
+  const currentlyClaimedField = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.P1);
+  return newlyClaimedFields.length + currentlyClaimedField.length >= 4;
 };
 
-const playerTwoWins = (ctx: Context) => {
-  const total = Object.values(ctx.claimedFields).reduce((acc, current) => (current === Owner.P2 ? acc++ : acc), 0);
-  return total >= 4;
+const playerTwoWins = (ctx: Context, event: EndTurnEvent): boolean => {
+  const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
+  const newlyClaimedFields = unclaimedFields.filter((field) => event.completedFields.includes(field));
+  const currentlyClaimedField = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.P2);
+  return newlyClaimedFields.length + currentlyClaimedField.length >= 4;
 };
 
-const matchesSelection = (fields: Fields, numerator: number, denominator: number) => {
-  const allFields = Object.values(fields);
-  const totalSelected = allFields.reduce((acc: MathType, currentField) => {
-    const currentFieldSelected = currentField.reduce((acc: MathType, currentCircle) => {
-      const currentCircleNumerator = currentCircle.reduce(
-        (accumulator, selection) => (selection === Selection.SELECTED ? accumulator + 1 : accumulator),
-        0
-      );
-      return add(fraction(currentCircleNumerator, currentCircle.length), acc);
-    }, fraction(0, 1));
-    return add(currentFieldSelected, acc);
-  }, fraction(0, 1));
-  return number(compare(totalSelected, fraction(numerator, denominator))) === 0;
-};
-
-const playerOneCorrectSelection = (ctx: Context) => {
-  const matches = matchesSelection(ctx.p1Data, ctx.turnData.numerator, ctx.turnData.denominator);
-  return matches;
-};
-
-const playerTwoCorrectSelection = (ctx: Context) => {
-  const matches = matchesSelection(ctx.p2Data, ctx.turnData.numerator, ctx.turnData.denominator);
-  return matches;
-};
-
-const fieldComplete = (field: Field) =>
-  field.every((circle) =>
-    circle.every((selection) => selection === Selection.FINALIZED || selection === Selection.DISABLED)
-  );
-
-/**
- * Shared states
- */
-
-const preRoll: StateNodeConfig<Context, {}, Events> = {
-  on: {
-    ROLL_DICE: {
-      target: "hasRolled",
-      actions: assign((ctx, _event, { state }) => {
-        const p1Turn = state?.matches("p1");
-        const currentPlayerData = p1Turn ? ctx.p1Data : ctx.p2Data;
-        const purpleDie = rollPurpleDie();
-        const goldDie = rollGoldDie();
-        assignDice(ctx, goldDie, purpleDie);
-        ctx.turnData.canRerollGoldDie = fieldComplete(currentPlayerData.king);
-        ctx.turnData.canRerollPurpleDie = fieldComplete(currentPlayerData.queen);
-        ctx.turnData.purpleDieSelected = false;
-        ctx.turnData.goldDieSelected = false;
-        return;
-      }),
-    },
-  },
+const canClaimNewField = (ctx: Context, event: EndTurnEvent): boolean => {
+  const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
+  const newlyClaimedFields = unclaimedFields.filter((field) => event.completedFields.includes(field));
+  return newlyClaimedFields.length > 0;
 };
 
 /**
- * Shared transitions
+ * Named Actions
  */
 
-const ROLL_DICE: TransitionConfigOrTarget<Context, { type: "ROLL_DICE" }> = {
-  actions: assign((ctx) => {
-    let goldDie = ctx.turnData.goldDie;
-    let purpleDie = ctx.turnData.purpleDie;
-    if (ctx.turnData.goldDieSelected) {
-      goldDie = rollGoldDie();
-      ctx.turnData.canRerollGoldDie = false;
-      ctx.turnData.goldDieSelected = false;
-    }
-    if (ctx.turnData.purpleDieSelected) {
-      purpleDie = rollPurpleDie();
-      ctx.turnData.canRerollPurpleDie = false;
-      ctx.turnData.purpleDieSelected = false;
-    }
-    assignDice(ctx, goldDie, purpleDie);
-  }),
-};
+const claimNewFields = assign<Context, EndTurnEvent>((ctx, event, { state }) => {
+  const owner = state?.matches("playing.P1") ? Owner.P1 : Owner.P2;
+  const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
+  const newlyClaimedFields = unclaimedFields.filter((field) => event.completedFields.includes(field));
 
-const TOGGLE_PURPLE_DIE_SELECTION: TransitionConfigOrTarget<Context, { type: "TOGGLE_PURPLE_DIE_SELECTION" }> = {
-  actions: assign((ctx) => {
-    ctx.turnData.purpleDieSelected = !ctx.turnData.purpleDieSelected;
-  }),
-  cond: canRerollPurpleDie,
-};
+  newlyClaimedFields.forEach((field) => {
+    ctx.claimedFields[field] = owner;
+  });
 
-const TOGGLE_GOLD_DIE_SELECTION: TransitionConfigOrTarget<Context, { type: "TOGGLE_GOLD_DIE_SELECTION" }> = {
-  actions: assign((ctx) => {
-    ctx.turnData.goldDieSelected = !ctx.turnData.goldDieSelected;
-  }),
-  cond: canRerollGoldDie,
-};
-
-const toggleSliceBase: TransitionConfigOrTarget<Context, ToggleSliceAction> = {
-  target: "hasRolled",
-  actions: assign((ctx, event) => {
-    const { field, circleIndex, cellIndex, player } = event;
-
-    const playerData = player === Player.P1 ? ctx.p1Data : ctx.p2Data;
-    const currentState = playerData[field][circleIndex][cellIndex];
-    if (currentState !== Selection.DISABLED && currentState !== Selection.FINALIZED) {
-      playerData[field][circleIndex][cellIndex] =
-        currentState === Selection.SELECTED ? Selection.UNSELECTED : Selection.SELECTED;
-
-      ctx.clickSound?.play();
-    }
-  }),
-};
-
-/**
- * Shared actions
- */
-
-const resetContextTurnData = assign((ctx: Context, _event: any) => {
-  ctx.turnData = resetTurnData();
+  return;
 });
 
-const finalizeAnswers = assign((ctx: Context, _event: any) => {
-  Object.entries(ctx.p1Data).forEach((entry) => {
-    const [key, value] = entry as [ExtendedFieldType, Field];
-    ctx.p1Data[key] = value.map((circle) =>
-      circle.map((selection) => (selection === Selection.SELECTED ? Selection.FINALIZED : selection))
-    );
-  });
+const playSuccessSound = (ctx: Context, _event: EndTurnEvent) => {
+  ctx.successSound?.play();
+};
 
-  Object.entries(ctx.p2Data).forEach((entry) => {
-    const [key, value] = entry as [ExtendedFieldType, Field];
-    ctx.p2Data[key] = value.map((circle) =>
-      circle.map((selection) => (selection === Selection.SELECTED ? Selection.FINALIZED : selection))
-    );
-  });
-
-  Object.entries(ctx.claimedFields).forEach((entry) => {
-    const [key, value] = entry as [FieldType, Owner];
-    if (value === Owner.UNOWNED) {
-      if (fieldComplete(ctx.p1Data[key])) ctx.claimedFields[key] = Owner.P1;
-      else if (fieldComplete(ctx.p2Data[key])) ctx.claimedFields[key] = Owner.P2;
-    }
-  });
-});
-
-const clearAnswers = assign((ctx: Context, _event: any) => {
-  Object.entries(ctx.p1Data).forEach((entry) => {
-    const [key, value] = entry as [ExtendedFieldType, Field];
-    ctx.p1Data[key] = value.map((circle) =>
-      circle.map((selection) => (selection === Selection.SELECTED ? Selection.UNSELECTED : selection))
-    );
-  });
-
-  Object.entries(ctx.p2Data).forEach((entry) => {
-    const [key, value] = entry as [ExtendedFieldType, Field];
-    ctx.p2Data[key] = value.map((circle) =>
-      circle.map((selection) => (selection === Selection.SELECTED ? Selection.UNSELECTED : selection))
-    );
-  });
-});
-
-/**
- * State Machine
- */
-
-export const kingsBlessingMachine = Machine<Context, States, Events>({
+const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
   id: "KINGS_BLESSING_MACHINE",
   initial: "start",
-  strict: true,
-  context: resetGame(),
+  context: { claimedFields: getClaimedFields() },
   states: {
     start: {
       entry: send("NEW_GAME"),
       on: {
         NEW_GAME: {
-          target: "p1",
-          actions: [
-            assign(resetGame),
-            assign((ctx) => {
-              // add audio
-              if (!ctx.clickSound) ctx.clickSound = new UIFx("/audio/kings_blessing_tick.mp3", { volume: 0.4 });
-              if (!ctx.failSound) ctx.failSound = new UIFx("/audio/kings_blessing_fail.wav", { volume: 0.4 });
-              if (!ctx.successSound) ctx.successSound = new UIFx("/audio/kings_blessing_success.wav", { volume: 0.4 });
-            }),
-          ],
+          target: "playing",
+          actions: actions.assign((ctx) => {
+            const playerOne = spawn(kingsBlessingActor, Player.P1);
+            const playerTwo = spawn(kingsBlessingActor, Player.P2);
+            return {
+              [Player.P1]: playerOne,
+              [Player.P2]: playerTwo,
+              successSound: ctx.successSound
+                ? ctx.successSound
+                : new UIFx("/audio/kings_blessing_success.wav", { volume: 0.4 }),
+            };
+          }),
         },
       },
     },
-    p1: {
-      initial: "preRoll",
+    playing: {
+      initial: Player.P1,
       states: {
-        preRoll,
-        hasRolled: {
+        [Player.P1]: {
+          entry: actions.send("BEGIN_TURN", { to: Player.P1 }),
           on: {
-            ROLL_DICE: ROLL_DICE,
-            TOGGLE_PURPLE_DIE_SELECTION: TOGGLE_PURPLE_DIE_SELECTION,
-            TOGGLE_GOLD_DIE_SELECTION: TOGGLE_GOLD_DIE_SELECTION,
-            TOGGLE_SLICE: { ...toggleSliceBase, cond: isPlayerOne },
-            // SPECIAL: {
-            //   actions: assign((ctx) => {
-            //     ctx.p1Data.queen = ctx.p1Data.queen.map((circle) =>
-            //       circle.map((selection) =>
-            //         selection === Selection.DISABLED ? Selection.DISABLED : Selection.FINALIZED
-            //       )
-            //     );
-            //   }),
-            // },
-            SUBMIT: [
+            END_TURN: [
               {
-                target: "submitted",
-                cond: playerOneCorrectSelection,
-                actions: [
-                  resetContextTurnData,
-                  finalizeAnswers,
-                  (ctx) => {
-                    fireSuccessToast(Player.P1);
-                    ctx.successSound?.play();
-                  },
-                ],
+                target: "p1Wins",
+                cond: playerOneWins,
+                actions: [claimNewFields, playSuccessSound],
               },
               {
-                target: "submitted",
-                actions: [
-                  resetContextTurnData,
-                  clearAnswers,
-                  (ctx) => {
-                    fireFailToast(Player.P2);
-                    ctx.failSound?.play();
-                  },
-                ],
+                target: Player.P2,
+                cond: canClaimNewField,
+                actions: claimNewFields,
               },
+              { target: Player.P2 },
             ],
           },
         },
-        submitted: {
-          type: "final",
-        },
-      },
-      onDone: [{ target: "p1Wins", cond: playerOneWins }, { target: "p2" }],
-    },
-
-    p2: {
-      initial: "preRoll",
-      states: {
-        preRoll,
-        hasRolled: {
+        [Player.P2]: {
+          entry: actions.send("BEGIN_TURN", { to: Player.P2 }),
           on: {
-            ROLL_DICE: ROLL_DICE,
-            TOGGLE_PURPLE_DIE_SELECTION: TOGGLE_PURPLE_DIE_SELECTION,
-            TOGGLE_GOLD_DIE_SELECTION: TOGGLE_GOLD_DIE_SELECTION,
-            TOGGLE_SLICE: { ...toggleSliceBase, cond: isPlayerTwo },
-            SUBMIT: [
+            END_TURN: [
               {
-                target: "submitted",
-                cond: playerTwoCorrectSelection,
-                actions: [
-                  resetContextTurnData,
-                  finalizeAnswers,
-                  (ctx) => {
-                    fireSuccessToast(Player.P2);
-                    ctx.successSound?.play();
-                  },
-                ],
+                target: "p2Wins",
+                cond: playerTwoWins,
+                actions: [claimNewFields, playSuccessSound],
               },
               {
-                target: "submitted",
-                actions: [
-                  resetContextTurnData,
-                  clearAnswers,
-                  (ctx) => {
-                    fireFailToast(Player.P2);
-                    ctx.failSound?.play();
-                  },
-                ],
+                target: Player.P1,
+                cond: canClaimNewField,
+                actions: claimNewFields,
               },
+              { target: Player.P1 },
             ],
           },
         },
-        submitted: {
-          type: "final",
-        },
-      },
-      onDone: [{ target: "p2Wins", cond: playerTwoWins }, { target: "p1" }],
-    },
-    p1Wins: {
-      on: {
-        NEW_GAME: "start",
-      },
-    },
-    p2Wins: {
-      on: {
-        NEW_GAME: "start",
+        p1Wins: {},
+        p2Wins: {},
       },
     },
   },
-});
+  on: {
+    NEW_GAME: "start",
+  },
+};
+
+export const kingsBlessingMachine: StateMachine<Context, StateSchema, Events, Typestate> =
+  createMachine(kingsBlessingConfig);

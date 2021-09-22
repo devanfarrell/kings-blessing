@@ -9,17 +9,20 @@ interface Props {
 }
 
 export const SuccessModal: FC<Props> = ({ machine, send }) => {
-  const isOpen = ["p1Wins", "p2Wins"].some(machine.matches);
+  const p1Wins = machine.matches("playing.p1Wins");
+  const p2Wins = machine.matches("playing.p2Wins");
+
+  const isOpen = p1Wins || p2Wins;
 
   if (!isOpen) return null;
-  const p1Wins = machine.matches("p1Wins");
+
   return (
     <Portal>
       <Background>
         <Card>
           <CardBody>
-            <div>You're a whole lot of awesome</div>
-            <div>You win {p1Wins ? "Red" : "Blue"}!</div>
+            <div>You win {p1Wins ? "player 1" : "player 2"}!</div>
+            <br />
             <Button
               onClick={() => {
                 send({ type: "NEW_GAME" });

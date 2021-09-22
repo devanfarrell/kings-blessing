@@ -17,9 +17,12 @@ export enum Player {
 
 export type Field = Selection[][];
 
-export type FieldType = "cows" | "wheat" | "lumber" | "pigs" | "fruit" | "water" | "wool";
-export const presentationOrder: FieldType[] = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"];
-export type ExtendedFieldType = FieldType | "queen" | "king";
+export const fieldPresentationOrder = ["cows", "wheat", "lumber", "pigs", "fruit", "water", "wool"] as const;
+export type FieldType = typeof fieldPresentationOrder[number];
+
+export const extendedFields = [...fieldPresentationOrder, "queen", "king"] as const;
+
+export type ExtendedFieldType = typeof extendedFields[number];
 
 export type Fields = Record<ExtendedFieldType, Field>;
 

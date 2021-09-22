@@ -4,20 +4,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { colors } from "./theme";
 import { Circle } from "./circle";
 import { FieldType, Player } from "./types";
-
-import type { MachineDef, SendFunc } from "./kings-blessing.machine";
+import { PlayerMachineDef, PlayerSendFunc } from "./player.machine";
 
 type FieldProps = {
   field: FieldType;
   player: Player;
-  machine: MachineDef;
-  send: SendFunc;
+  machine: PlayerMachineDef;
+  send: PlayerSendFunc;
 };
 
 export const Field: FC<FieldProps> = ({ field, player, machine, send }) => {
   const [circleIndex, setCurrentCircleIndex] = useState(0);
-  const playerData = player === Player.P1 ? machine.context.p1Data : machine.context.p2Data;
-  const fieldData = playerData[field];
+  const fieldData = machine.context.fields[field];
 
   return (
     <PlayBlock>
@@ -72,7 +70,6 @@ const SelectionCircle = styled(Circle, { shouldForwardProp: (prop) => prop !== "
 
 const PlayCircleWrapper = styled.div`
   display: flex;
-  height: 100%;
   width: 100%;
 `;
 

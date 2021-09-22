@@ -35,8 +35,6 @@ export default function Settings() {
   );
 }
 
-// Default player color
-// Orange Blue
 // Default player names
 
 // add claim a field sound
