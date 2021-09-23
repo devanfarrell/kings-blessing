@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 
 import type { GoldDie as IGoldDie } from "./types";
 import type { MachineDef, SendFunc } from "./kings-blessing.machine";
+import { PlayerMachineDef, PlayerSendFunc } from "./player.machine";
 
 interface InternalDotsProps {
   value: IGoldDie;
@@ -107,8 +108,8 @@ const InternalDots: FC<InternalDotsProps> = ({ value }) => {
 };
 
 interface DieInterface {
-  machine: MachineDef;
-  send: SendFunc;
+  machine: PlayerMachineDef;
+  send: PlayerSendFunc;
 }
 
 export const GoldDie: FC<DieInterface> = ({ machine, send }) => {

@@ -3,7 +3,7 @@ import { CSSProperties, FC } from "react";
 import { colors } from "./theme";
 import styled from "@emotion/styled";
 import { Selection, Player, ExtendedFieldType } from "./types";
-import type { MachineDef, SendFunc } from "./kings-blessing.machine";
+import { PlayerMachineDef, PlayerSendFunc } from "./player.machine";
 
 const getColor = (selection: Selection, player: Player) => {
   if (selection === Selection.DISABLED) return "grey";
@@ -17,14 +17,12 @@ type CircleProps = {
   circleIndex: number;
   player: Player;
   style?: CSSProperties;
-  machine: MachineDef;
-  send: SendFunc;
+  machine: PlayerMachineDef;
+  send: PlayerSendFunc;
 };
 export const Circle: FC<CircleProps> = ({ style, field, player, circleIndex, send, machine, ...other }) => {
   const { context } = machine;
-
-  const playerData = player === Player.P1 ? context.p1Data : context.p2Data;
-  const selections = playerData[field][circleIndex];
+  const selections = context.fields[field][circleIndex];
 
   return (
     <svg style={style ?? {}} viewBox="-103 -103 206 206" {...other}>
@@ -34,7 +32,7 @@ export const Circle: FC<CircleProps> = ({ style, field, player, circleIndex, sen
             key={i}
             clickable={selection === Selection.SELECTED || selection === Selection.UNSELECTED}
             backgroundColor={getColor(selection, player)}
-            onClick={() => send({ type: "TOGGLE_SLICE", field, circleIndex, cellIndex: i, player })}
+            onClick={() => send({ type: "TOGGLE_SLICE", field, circleIndex, cellIndex: i })}
             d={calculatePath(selections.length, i)}
           />
         ))}

@@ -2,8 +2,8 @@ import { FC } from "react";
 import styled from "@emotion/styled";
 import { Crown } from "./crown";
 import { kingsBlessingMachine } from "./kings-blessing.machine";
-import { presentationOrder, Player } from "./types";
-import { useMachine } from "@xstate/react";
+import { fieldPresentationOrder, Player } from "./types";
+import { useActor, useMachine } from "@xstate/react";
 import { Circle } from "./circle";
 import { Field } from "./field";
 import { Dice } from "./dice";
@@ -13,6 +13,7 @@ import { fas, faCheckSquare, faTimes, faAngleDown, faAngleUp } from "@fortawesom
 import { css, Global } from "@emotion/react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { SettingsMachine } from "../../machines/settings.machine";
+import { SpawnedPlayerMachine } from "./player.machine";
 
 library.add(fas, faCheckSquare, faTimes, faAngleDown, faAngleUp);
 
@@ -22,93 +23,116 @@ const globalStyles = css`
   }
 `;
 
+const PlayerOne: FC<{ actor: SpawnedPlayerMachine }> = ({ actor }) => {
+  const [machine, send] = useActor(actor);
+  const showDice = !machine.matches("awaitingTurn");
+  return (
+    <>
+      {showDice && <Dice {...{ machine, send }} player={Player.P1} />}
+      <Edge>
+        <ThreeParts>
+          <OneThird>
+            <PartTitle>King's Blessing</PartTitle>
+            <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
+          </OneThird>
+          <TwoThirds>
+            <RoyalCirclesWrapper>
+              <Circle field="king" circleIndex={0} player={Player.P1} {...{ machine, send }} />
+              <Circle field="king" circleIndex={1} player={Player.P1} {...{ machine, send }} />
+              <Circle field="king" circleIndex={2} player={Player.P1} {...{ machine, send }} />
+            </RoyalCirclesWrapper>
+          </TwoThirds>
+        </ThreeParts>
+        <ThreeParts>
+          <OneThird>
+            <PartTitle>Queen's Blessing</PartTitle>
+            <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
+          </OneThird>
+          <TwoThirds>
+            <RoyalCirclesWrapper>
+              <Circle field="queen" circleIndex={0} player={Player.P1} {...{ machine, send }} />
+              <Circle field="queen" circleIndex={1} player={Player.P1} {...{ machine, send }} />
+              <Circle field="queen" circleIndex={2} player={Player.P1} {...{ machine, send }} />
+            </RoyalCirclesWrapper>
+          </TwoThirds>
+        </ThreeParts>
+      </Edge>
+      <PlayArea>
+        {fieldPresentationOrder.map((field) => (
+          <Field key={field} {...{ send, field, machine }} player={Player.P1} />
+        ))}
+      </PlayArea>
+    </>
+  );
+};
+
+const PlayerTwo: FC<{ actor: SpawnedPlayerMachine; rotated: boolean }> = ({ actor, rotated }) => {
+  const [machine, send] = useActor(actor);
+
+  const showDice = !machine.matches("awaitingTurn");
+  return (
+    <>
+      {showDice && <Dice {...{ machine, send }} player={Player.P2} />}
+      <PlayArea>
+        {fieldPresentationOrder.map((field) => (
+          <Field key={field} {...{ send, field, machine }} player={Player.P2} />
+        ))}
+      </PlayArea>
+      <Edge rotated={rotated}>
+        <ThreeParts>
+          <OneThird>
+            <PartTitle>King's Blessing</PartTitle>
+            <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
+          </OneThird>
+          <TwoThirds>
+            <RoyalCirclesWrapper>
+              <Circle field="king" circleIndex={0} player={Player.P2} {...{ machine, send }} />
+              <Circle field="king" circleIndex={1} player={Player.P2} {...{ machine, send }} />
+              <Circle field="king" circleIndex={2} player={Player.P2} {...{ machine, send }} />
+            </RoyalCirclesWrapper>
+          </TwoThirds>
+        </ThreeParts>
+        <ThreeParts>
+          <OneThird>
+            <PartTitle>Queen's Blessing</PartTitle>
+            <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
+          </OneThird>
+          <TwoThirds>
+            <RoyalCirclesWrapper>
+              <Circle field="queen" circleIndex={0} player={Player.P2} {...{ machine, send }} />
+              <Circle field="queen" circleIndex={1} player={Player.P2} {...{ machine, send }} />
+              <Circle field="queen" circleIndex={2} player={Player.P2} {...{ machine, send }} />
+            </RoyalCirclesWrapper>
+          </TwoThirds>
+        </ThreeParts>
+      </Edge>
+    </>
+  );
+};
+
 const KingsBlessing: FC = () => {
   const [machine, send] = useMachine(kingsBlessingMachine, { devTools: true });
   const [settingsMachine] = useMachine(SettingsMachine);
   const { context: settings } = settingsMachine;
 
-  return (
-    <>
-      <Global styles={[globalStyles]} />
-      <Wrapper>
-        <SuccessModal {...{ machine, send }} />
-        <Edge>
-          <ThreeParts>
-            <OneThird>
-              <PartTitle>King's Blessing</PartTitle>
-              <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
-            </OneThird>
-            <TwoThirds>
-              <RoyalCirclesWrapper>
-                <Circle field="king" circleIndex={0} player={Player.P1} {...{ machine, send }} />
-                <Circle field="king" circleIndex={1} player={Player.P1} {...{ machine, send }} />
-                <Circle field="king" circleIndex={2} player={Player.P1} {...{ machine, send }} />
-              </RoyalCirclesWrapper>
-            </TwoThirds>
-          </ThreeParts>
-          <ThreeParts>
-            <OneThird>
-              <PartTitle>Queen's Blessing</PartTitle>
-              <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
-            </OneThird>
-            <TwoThirds>
-              <RoyalCirclesWrapper>
-                <Circle field="queen" circleIndex={0} player={Player.P1} {...{ machine, send }} />
-                <Circle field="queen" circleIndex={1} player={Player.P1} {...{ machine, send }} />
-                <Circle field="queen" circleIndex={2} player={Player.P1} {...{ machine, send }} />
-              </RoyalCirclesWrapper>
-            </TwoThirds>
-          </ThreeParts>
-        </Edge>
-        <PlayArea>
-          {presentationOrder.map((field) => (
-            <Field key={`${field}-${Player.P1}`} {...{ send, field, machine }} player={Player.P1} />
-          ))}
-        </PlayArea>
-
-        <Dice {...{ machine, send }} />
-        <Center>
-          {presentationOrder.map((field) => (
-            <Crown key={field} owner={machine.context.claimedFields[field]} />
-          ))}
-        </Center>
-        <PlayArea>
-          {presentationOrder.map((field) => (
-            <Field key={`${field}-${Player.P2}`} {...{ send, field, machine }} player={Player.P2} />
-          ))}
-        </PlayArea>
-
-        <Edge rotated={settings.tabletop}>
-          <ThreeParts>
-            <OneThird>
-              <PartTitle>King's Blessing</PartTitle>
-              <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
-            </OneThird>
-            <TwoThirds>
-              <RoyalCirclesWrapper>
-                <Circle field="king" circleIndex={0} player={Player.P2} {...{ machine, send }} />
-                <Circle field="king" circleIndex={1} player={Player.P2} {...{ machine, send }} />
-                <Circle field="king" circleIndex={2} player={Player.P2} {...{ machine, send }} />
-              </RoyalCirclesWrapper>
-            </TwoThirds>
-          </ThreeParts>
-          <ThreeParts>
-            <OneThird>
-              <PartTitle>Queen's Blessing</PartTitle>
-              <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
-            </OneThird>
-            <TwoThirds>
-              <RoyalCirclesWrapper>
-                <Circle field="queen" circleIndex={0} player={Player.P2} {...{ machine, send }} />
-                <Circle field="queen" circleIndex={1} player={Player.P2} {...{ machine, send }} />
-                <Circle field="queen" circleIndex={2} player={Player.P2} {...{ machine, send }} />
-              </RoyalCirclesWrapper>
-            </TwoThirds>
-          </ThreeParts>
-        </Edge>
-      </Wrapper>
-    </>
-  );
+  if (machine.matches("playing")) {
+    return (
+      <>
+        <Global styles={[globalStyles]} />
+        <Wrapper>
+          <SuccessModal machine={machine} send={send} />
+          <PlayerOne actor={machine.context.P1} />
+          <Center>
+            {fieldPresentationOrder.map((field) => (
+              <Crown key={field} owner={machine.context.claimedFields[field]} />
+            ))}
+          </Center>
+          <PlayerTwo actor={machine.context.P2} rotated={settings.tabletop} />
+        </Wrapper>
+      </>
+    );
+  }
+  return <div>Loading</div>;
 };
 export default KingsBlessing;
 
