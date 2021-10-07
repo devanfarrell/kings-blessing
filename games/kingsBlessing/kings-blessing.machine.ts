@@ -150,7 +150,7 @@ type SaveStructure = { claimedFields: Context["claimedFields"]; player: Player }
 const LOCAL_STORAGE_KEY = "KINGS_BLESSING/TOP_LEVEL_STATE";
 
 const saveMachineState = (ctx: Context, _event: any, { state }: ActionMeta<Context, any>) => {
-  const player = state.matches(Player.P1) ? Player.P1 : Player.P2;
+  const player = state.matches(Player.P2) ? Player.P2 : Player.P1;
   const saveFile: SaveStructure = { claimedFields: ctx.claimedFields, player };
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(saveFile));
 };
@@ -201,7 +201,7 @@ const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
           },
           {
             target: "playing",
-            actions: [loadSoundEffects, spawnPlayerMachines],
+            actions: [saveMachineState, loadSoundEffects, spawnPlayerMachines],
           },
         ],
       },
@@ -210,6 +210,7 @@ const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
       on: {
         NEW_GAME: {
           target: "playing",
+          actions: [saveMachineState],
         },
         RESUME_GAME: [
           {
