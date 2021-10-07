@@ -33,7 +33,7 @@ const PlayerOne: FC<{ actor: SpawnedPlayerMachine }> = ({ actor }) => {
       <Edge>
         <ThreeParts>
           <OneThird>
-            <PartTitle>King's Blessing</PartTitle>
+            <PartTitle>King&apos;s Blessing</PartTitle>
             <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
           </OneThird>
           <TwoThirds>
@@ -46,7 +46,7 @@ const PlayerOne: FC<{ actor: SpawnedPlayerMachine }> = ({ actor }) => {
         </ThreeParts>
         <ThreeParts>
           <OneThird>
-            <PartTitle>Queen's Blessing</PartTitle>
+            <PartTitle>Queen&apos;s Blessing</PartTitle>
             <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
           </OneThird>
           <TwoThirds>
@@ -82,7 +82,7 @@ const PlayerTwo: FC<{ actor: SpawnedPlayerMachine; rotated: boolean }> = ({ acto
       <Edge rotated={rotated}>
         <ThreeParts>
           <OneThird>
-            <PartTitle>King's Blessing</PartTitle>
+            <PartTitle>King&apos;s Blessing</PartTitle>
             <PartDescription>When Completed, you may re-roll the gold die</PartDescription>
           </OneThird>
           <TwoThirds>
@@ -95,7 +95,7 @@ const PlayerTwo: FC<{ actor: SpawnedPlayerMachine; rotated: boolean }> = ({ acto
         </ThreeParts>
         <ThreeParts>
           <OneThird>
-            <PartTitle>Queen's Blessing</PartTitle>
+            <PartTitle>Queen&apos;s Blessing</PartTitle>
             <PartDescription>When Completed, you may re-roll the purple die</PartDescription>
           </OneThird>
           <TwoThirds>
