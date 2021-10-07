@@ -12,22 +12,15 @@ import {
   Field,
   extendedFields,
   fieldPresentationOrder,
+  Player,
 } from "./types";
-import { MachineEvent } from "../../types";
-// import { inspect } from "@xstate/inspect";
-
+import type { MachineEvent } from "../../types";
 import type { EndTurnEvent } from "./kings-blessing.machine";
-
-// if (typeof window !== "undefined") {
-//   inspect({
-//     url: "https:statecharts.io/inspect",
-//     iframe: false,
-//   });
-// }
 
 type PlayerContext = {
   fields: Fields;
   turnData: TurnData;
+  player: Player;
 };
 
 type PlayerMachineStateSchema = {
@@ -42,12 +35,17 @@ type PlayerMachineTypestate = {
   value: any;
   context: PlayerContext;
 };
+
+type SubmitEvent = MachineEvent<"SUBMIT">;
+type LoadEvent = MachineEvent<"LOAD">;
+
 export type Events =
+  | LoadEvent
   | MachineEvent<"BEGIN_TURN">
   | MachineEvent<"ROLL_DICE">
   | MachineEvent<"TOGGLE_PURPLE_DIE_SELECTION">
   | MachineEvent<"TOGGLE_GOLD_DIE_SELECTION">
-  | MachineEvent<"SUBMIT">
+  | SubmitEvent
   | MachineEvent<"TOGGLE_SLICE", { field: ExtendedFieldType; circleIndex: number; cellIndex: number }>;
 
 export type PlayerMachineDef = State<PlayerContext, Events, PlayerMachineStateSchema>;
@@ -91,7 +89,7 @@ const resetFields = (): Fields => ({
   ],
 });
 
-const resetTurnData = (ctx?: PlayerContext): TurnData => ({
+const getInitialTurnData = (ctx?: PlayerContext): TurnData => ({
   numerator: 0,
   denominator: 0,
   goldDie: 0,
@@ -122,7 +120,7 @@ const assignDice = (ctx: PlayerContext, goldDie: GoldDie, purpleDie: PurpleDie):
   ctx.turnData.denominator = denominator;
 };
 
-const endTurn = actions.sendParent<PlayerContext, MachineEvent<"SUBMIT">, EndTurnEvent>((ctx) => {
+const sendParentEndTurn = actions.sendParent<PlayerContext, MachineEvent<"SUBMIT">, EndTurnEvent>((ctx) => {
   const completedFields = fieldPresentationOrder.filter((key) => fieldComplete(ctx.fields[key]));
   return {
     type: "END_TURN",
@@ -179,16 +177,40 @@ const clearAnswers = assign((ctx: PlayerContext, _event: any) => {
   });
 });
 
+const LOCAL_STORAGE_KEY = (player: Player) => `KINGS_BLESSING/${player}`;
+const saveContext = (ctx: PlayerContext, _event: any) => {
+  localStorage.setItem(LOCAL_STORAGE_KEY(ctx.player), JSON.stringify(ctx));
+};
+
+const loadContext = assign<PlayerContext, LoadEvent>((ctx) => {
+  const stringState = localStorage.getItem(LOCAL_STORAGE_KEY(ctx.player));
+  if (stringState) {
+    const state: PlayerContext = JSON.parse(stringState);
+    ctx.fields = state.fields;
+    ctx.turnData = state.turnData;
+    return state;
+  }
+});
+
+const resetTurnData = assign<PlayerContext, SubmitEvent>((ctx) => (ctx.turnData = getInitialTurnData(ctx)));
+
 const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateSchema, Events> = {
   id: "PLAYER_MACHINE",
   initial: "awaitingTurn",
-  context: { fields: resetFields(), turnData: resetTurnData() },
   states: {
     awaitingTurn: {
       on: {
-        BEGIN_TURN: {
-          target: "awaitingDiceRoll",
-          actions: assign((ctx) => (ctx.turnData = resetTurnData(ctx))),
+        BEGIN_TURN: [
+          {
+            target: "takingTurn",
+            cond: (ctx) => ctx.turnData.goldDie !== 0 && ctx.turnData.purpleDie !== 0,
+          },
+          {
+            target: "awaitingDiceRoll",
+          },
+        ],
+        LOAD: {
+          actions: loadContext,
         },
       },
     },
@@ -196,15 +218,18 @@ const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateS
       on: {
         ROLL_DICE: {
           target: "takingTurn",
-          actions: assign((ctx) => {
-            const purpleDie = rollPurpleDie();
-            const goldDie = rollGoldDie();
-            assignDice(ctx, goldDie, purpleDie);
-            ctx.turnData.canRerollGoldDie = fieldComplete(ctx.fields.king);
-            ctx.turnData.canRerollPurpleDie = fieldComplete(ctx.fields.queen);
-            ctx.turnData.purpleDieSelected = false;
-            ctx.turnData.goldDieSelected = false;
-          }),
+          actions: [
+            assign((ctx, _event, state) => {
+              const purpleDie = rollPurpleDie();
+              const goldDie = rollGoldDie();
+              assignDice(ctx, goldDie, purpleDie);
+              ctx.turnData.canRerollGoldDie = fieldComplete(ctx.fields.king);
+              ctx.turnData.canRerollPurpleDie = fieldComplete(ctx.fields.queen);
+              ctx.turnData.purpleDieSelected = false;
+              ctx.turnData.goldDieSelected = false;
+            }),
+            saveContext,
+          ],
         },
       },
     },
@@ -238,33 +263,43 @@ const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateS
           cond: canRerollGoldDie,
         },
         ROLL_DICE: {
-          actions: assign((ctx) => {
-            let goldDie = ctx.turnData.goldDie;
-            let purpleDie = ctx.turnData.purpleDie;
-            if (ctx.turnData.goldDieSelected) {
-              goldDie = rollGoldDie();
-              ctx.turnData.canRerollGoldDie = false;
-              ctx.turnData.goldDieSelected = false;
-            }
-            if (ctx.turnData.purpleDieSelected) {
-              purpleDie = rollPurpleDie();
-              ctx.turnData.canRerollPurpleDie = false;
-              ctx.turnData.purpleDieSelected = false;
-            }
-            assignDice(ctx, goldDie, purpleDie);
-          }),
+          actions: [
+            assign((ctx) => {
+              let goldDie = ctx.turnData.goldDie;
+              let purpleDie = ctx.turnData.purpleDie;
+              if (ctx.turnData.goldDieSelected) {
+                goldDie = rollGoldDie();
+                ctx.turnData.canRerollGoldDie = false;
+                ctx.turnData.goldDieSelected = false;
+              }
+              if (ctx.turnData.purpleDieSelected) {
+                purpleDie = rollPurpleDie();
+                ctx.turnData.canRerollPurpleDie = false;
+                ctx.turnData.purpleDieSelected = false;
+              }
+              assignDice(ctx, goldDie, purpleDie);
+            }),
+            saveContext,
+          ],
         },
         SUBMIT: [
           {
             target: "awaitingTurn",
             cond: matchesSelection,
-            actions: [finalizeAnswers, endTurn],
+            actions: [resetTurnData, finalizeAnswers, sendParentEndTurn, saveContext],
           },
-          { target: "awaitingTurn", actions: [clearAnswers, endTurn] },
+          {
+            target: "awaitingTurn",
+            actions: [resetTurnData, clearAnswers, sendParentEndTurn, saveContext],
+          },
         ],
       },
     },
   },
 };
 
-export const kingsBlessingActor = createMachine(kingsBlessingActorConfig);
+export const kingsBlessingActor = (player: Player) =>
+  createMachine({
+    ...kingsBlessingActorConfig,
+    context: { player, fields: resetFields(), turnData: getInitialTurnData() },
+  });
