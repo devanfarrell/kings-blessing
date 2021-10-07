@@ -4,19 +4,16 @@ import { SpawnedPlayerMachine, kingsBlessingActor } from "./player.machine";
 
 import UIFx from "uifx";
 import { FieldType, Owner, Player, Selection, fieldPresentationOrder } from "./types";
-import { MachineEvent } from "../../types";
+import { ActionMeta, MachineEvent } from "../../types";
 import { inspect } from "@xstate/inspect";
 import { assign } from "@xstate/immer";
 
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && localStorage.getItem("development") === "true") {
   inspect({
     url: "https:statecharts.io/inspect",
     iframe: false,
   });
 }
-
-export const selectionReduce = (accumulator: Selection, currentValue: number) =>
-  currentValue === Selection.SELECTED ? accumulator + 1 : accumulator;
 
 const getClaimedFields = (): Record<FieldType, Owner> => ({
   cows: Owner.UNOWNED,
@@ -38,6 +35,7 @@ export type Context = {
 type StateSchema = {
   states: {
     start: {};
+    promptResume: {};
     playing: {
       states: {
         [Player.P1]: {};
@@ -59,6 +57,14 @@ type Typestate =
       };
     }
   | {
+      value: "promptResume";
+      context: Context & {
+        [Player.P1]: SpawnedPlayerMachine;
+        [Player.P2]: SpawnedPlayerMachine;
+        successSound: UIFx;
+      };
+    }
+  | {
       value: "playing";
       context: Context & {
         [Player.P1]: SpawnedPlayerMachine;
@@ -70,11 +76,16 @@ type Typestate =
   | { value: "playing.p2Wins"; context: Context };
 
 export type EndTurnEvent = MachineEvent<"END_TURN", { completedFields: FieldType[] }>;
+type RunGameEvent = MachineEvent<"RUN">;
+type NewGameEvent = MachineEvent<"NEW_GAME">;
+type ResumeGameEvent = MachineEvent<"RESUME_GAME">;
 
-export type Events = MachineEvent<"NEW_GAME"> | EndTurnEvent;
+export type ExternalEvents = NewGameEvent | ResumeGameEvent;
+type InternalEvents = EndTurnEvent | RunGameEvent;
+export type Events = ExternalEvents | InternalEvents;
 
 export type MachineDef = State<Context, Events, StateSchema, Typestate>;
-export type SendFunc = (event: Events) => any;
+export type SendFunc = (event: ExternalEvents) => any;
 
 /**
  * Guards
@@ -104,6 +115,26 @@ const canClaimNewField = (ctx: Context, event: EndTurnEvent): boolean => {
  * Named Actions
  */
 
+const loadSoundEffects = actions.assign<Context, RunGameEvent>((ctx): Partial<Context> => {
+  return {
+    successSound: ctx.successSound ? ctx.successSound : new UIFx("/audio/kings_blessing_success.wav", { volume: 0.4 }),
+  };
+});
+
+const spawnPlayerMachines = actions.assign<Context, any>((): Partial<Context> => {
+  const playerOne = spawn(kingsBlessingActor(Player.P1), Player.P1);
+  const playerTwo = spawn(kingsBlessingActor(Player.P2), Player.P2);
+  return {
+    [Player.P1]: playerOne,
+    [Player.P2]: playerTwo,
+  };
+});
+
+const killPlayerMachines = (ctx: Context, _event: NewGameEvent) => {
+  ctx[Player.P1]?.stop?.();
+  ctx[Player.P2]?.stop?.();
+};
+
 const claimNewFields = assign<Context, EndTurnEvent>((ctx, event, { state }) => {
   const owner = state?.matches("playing.P1") ? Owner.P1 : Owner.P2;
   const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
@@ -112,9 +143,42 @@ const claimNewFields = assign<Context, EndTurnEvent>((ctx, event, { state }) => 
   newlyClaimedFields.forEach((field) => {
     ctx.claimedFields[field] = owner;
   });
-
   return;
 });
+
+type SaveStructure = { claimedFields: Context["claimedFields"]; player: Player };
+const LOCAL_STORAGE_KEY = "KINGS_BLESSING/TOP_LEVEL_STATE";
+
+const saveMachineState = (ctx: Context, _event: any, { state }: ActionMeta<Context, any>) => {
+  const player = state.matches(Player.P1) ? Player.P1 : Player.P2;
+  const saveFile: SaveStructure = { claimedFields: ctx.claimedFields, player };
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(saveFile));
+};
+
+const getSavedState = (): SaveStructure | undefined => {
+  const stringSavedFile = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (stringSavedFile) return JSON.parse(stringSavedFile);
+};
+
+const loadMachineState = assign<Context, ResumeGameEvent>((ctx) => {
+  const saveFile = getSavedState();
+  if (!saveFile) {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    throw new Error("Failed to load previous game");
+  }
+  ctx.claimedFields = saveFile.claimedFields;
+});
+
+const previousGameExists = (_ctx: Context, _event: RunGameEvent): boolean => {
+  const existingData = getSavedState();
+  if (!existingData) return false;
+  // TODO: Better local storage verification
+  return true;
+};
+
+const deleteSavedState = (_ctx: Context, _event: any) => {
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
+};
 
 const playSuccessSound = (ctx: Context, _event: EndTurnEvent) => {
   ctx.successSound?.play();
@@ -123,25 +187,52 @@ const playSuccessSound = (ctx: Context, _event: EndTurnEvent) => {
 const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
   id: "KINGS_BLESSING_MACHINE",
   initial: "start",
+  preserveActionOrder: true,
   context: { claimedFields: getClaimedFields() },
   states: {
     start: {
-      entry: send("NEW_GAME"),
+      entry: send("RUN"),
+      on: {
+        RUN: [
+          {
+            target: "promptResume",
+            actions: [loadSoundEffects, spawnPlayerMachines],
+            cond: previousGameExists,
+          },
+          {
+            target: "playing",
+            actions: [loadSoundEffects, spawnPlayerMachines],
+          },
+        ],
+      },
+    },
+    promptResume: {
       on: {
         NEW_GAME: {
           target: "playing",
-          actions: actions.assign((ctx) => {
-            const playerOne = spawn(kingsBlessingActor, Player.P1);
-            const playerTwo = spawn(kingsBlessingActor, Player.P2);
-            return {
-              [Player.P1]: playerOne,
-              [Player.P2]: playerTwo,
-              successSound: ctx.successSound
-                ? ctx.successSound
-                : new UIFx("/audio/kings_blessing_success.wav", { volume: 0.4 }),
-            };
-          }),
         },
+        RESUME_GAME: [
+          {
+            target: `playing.${Player.P1}`,
+            actions: [
+              loadMachineState,
+              actions.send("LOAD", { to: Player.P1 }),
+              actions.send("LOAD", { to: Player.P2 }),
+            ],
+            cond: () => {
+              const saved = getSavedState();
+              return saved!.player === Player.P1;
+            },
+          },
+          {
+            target: `playing.${Player.P2}`,
+            actions: [
+              loadMachineState,
+              actions.send("LOAD", { to: Player.P1 }),
+              actions.send("LOAD", { to: Player.P2 }),
+            ],
+          },
+        ],
       },
     },
     playing: {
@@ -154,14 +245,14 @@ const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
               {
                 target: "p1Wins",
                 cond: playerOneWins,
-                actions: [claimNewFields, playSuccessSound],
+                actions: [claimNewFields, playSuccessSound, deleteSavedState, saveMachineState],
               },
               {
                 target: Player.P2,
                 cond: canClaimNewField,
-                actions: claimNewFields,
+                actions: [claimNewFields, saveMachineState],
               },
-              { target: Player.P2 },
+              { target: Player.P2, actions: saveMachineState },
             ],
           },
         },
@@ -172,24 +263,29 @@ const kingsBlessingConfig: MachineConfig<Context, StateSchema, Events> = {
               {
                 target: "p2Wins",
                 cond: playerTwoWins,
-                actions: [claimNewFields, playSuccessSound],
+                actions: [claimNewFields, playSuccessSound, deleteSavedState, saveMachineState],
               },
               {
                 target: Player.P1,
                 cond: canClaimNewField,
-                actions: claimNewFields,
+                actions: [claimNewFields, saveMachineState],
               },
-              { target: Player.P1 },
+              { target: Player.P1, actions: saveMachineState },
             ],
           },
         },
-        p1Wins: {},
-        p2Wins: {},
+        p1Wins: {
+          on: {
+            NEW_GAME: { target: Player.P1, actions: [killPlayerMachines, spawnPlayerMachines] },
+          },
+        },
+        p2Wins: {
+          on: {
+            NEW_GAME: { target: Player.P1, actions: [killPlayerMachines, spawnPlayerMachines] },
+          },
+        },
       },
     },
-  },
-  on: {
-    NEW_GAME: "start",
   },
 };
 

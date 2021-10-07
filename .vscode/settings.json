@@ -1,4 +1,9 @@
 {
   "editor.semanticHighlighting.enabled": true,
-  "cSpell.words": ["cond"]
+  "cSpell.words": [
+    "cond",
+    "immer",
+    "Typestate",
+    "xstate"
+  ]
 }

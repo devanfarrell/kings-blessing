@@ -14,6 +14,7 @@ import { css, Global } from "@emotion/react";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { SettingsMachine } from "../../machines/settings.machine";
 import { SpawnedPlayerMachine } from "./player.machine";
+import { ResumeModal } from "./resumeModal";
 
 library.add(fas, faCheckSquare, faTimes, faAngleDown, faAngleUp);
 
@@ -115,12 +116,13 @@ const KingsBlessing: FC = () => {
   const [settingsMachine] = useMachine(SettingsMachine);
   const { context: settings } = settingsMachine;
 
-  if (machine.matches("playing")) {
+  if (machine.matches("playing") || machine.matches("promptResume")) {
     return (
       <>
         <Global styles={[globalStyles]} />
         <Wrapper>
-          <SuccessModal machine={machine} send={send} />
+          <ResumeModal {...{ machine, send }} />
+          <SuccessModal {...{ machine, send }} />
           <PlayerOne actor={machine.context.P1} />
           <Center>
             {fieldPresentationOrder.map((field) => (

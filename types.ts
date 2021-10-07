@@ -1,4 +1,5 @@
 import { ReactElement, FunctionComponent } from "react";
+import { ActionMeta as xstateActionMeta, ActionObject, EventObject } from "xstate";
 
 // Functional Component without children
 export interface FC<P = {}> {
@@ -11,3 +12,9 @@ export type CFC<P = {}> = FunctionComponent<P>;
 export type MachineEvent<E extends string, P = {}> = {
   type: E;
 } & P;
+
+export type ActionMeta<Context, Event extends EventObject> = xstateActionMeta<
+  Context,
+  Event,
+  ActionObject<Context, Event>
+>;
