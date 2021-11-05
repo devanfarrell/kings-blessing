@@ -3,7 +3,7 @@ import { send, State, createMachine, MachineConfig, actions, spawn, StateMachine
 import { SpawnedPlayerMachine, kingsBlessingActor } from "./player.machine";
 
 import UIFx from "uifx";
-import { FieldType, Owner, Player, Selection, fieldPresentationOrder } from "./types";
+import { FieldType, Owner, Player, fieldPresentationOrder } from "./types";
 import { ActionMeta, MachineEvent } from "../../types";
 import { inspect } from "@xstate/inspect";
 import { assign } from "@xstate/immer";
@@ -150,7 +150,7 @@ type SaveStructure = { claimedFields: Context["claimedFields"]; player: Player }
 const LOCAL_STORAGE_KEY = "KINGS_BLESSING/TOP_LEVEL_STATE";
 
 const saveMachineState = (ctx: Context, _event: any, { state }: ActionMeta<Context, any>) => {
-  const player = state.matches(Player.P2) ? Player.P2 : Player.P1;
+  const player = state.matches(`playing.${Player.P2}`) ? Player.P2 : Player.P1;
   const saveFile: SaveStructure = { claimedFields: ctx.claimedFields, player };
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(saveFile));
 };

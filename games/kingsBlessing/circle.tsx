@@ -1,5 +1,4 @@
 import { CSSProperties, FC } from "react";
-
 import { colors } from "./theme";
 import styled from "@emotion/styled";
 import { Selection, Player, ExtendedFieldType } from "./types";
@@ -41,25 +40,25 @@ export const Circle: FC<CircleProps> = ({ style, field, player, circleIndex, sen
   );
 };
 
-function coordinatesFromRadians(radians: number) {
+const coordinatesFromRadians = (radians: number) => {
   const x = Math.cos(radians) * 100;
   const y = Math.sin(radians) * 100;
   return { x: x === 0 ? 100 : x, y };
-}
+};
 
-function coordinateString(slicePercent: number, accumulativePercent: number) {
+const coordinateString = (slicePercent: number, accumulativePercent: number) => {
   const pi = Math.PI;
   const startRad = 2 * pi * accumulativePercent;
   const endRad = 2 * pi * (slicePercent + accumulativePercent);
   const start = coordinatesFromRadians(startRad);
   const end = coordinatesFromRadians(endRad);
   return `M0,0 L${start.x},${start.y} A100,100 0 ${slicePercent >= 0.5 ? 1 : 0},1 ${end.x},${end.y} Z`;
-}
+};
 
-function calculatePath(sliceCount: number, index: number) {
+const calculatePath = (sliceCount: number, index: number) => {
   const percent = 1 / sliceCount;
   return coordinateString(percent, percent * index);
-}
+};
 
 const Path = styled.path<{ clickable: boolean; backgroundColor: string }>`
   cursor: ${(p) => (p.clickable ? "pointer" : "not-allowed")};

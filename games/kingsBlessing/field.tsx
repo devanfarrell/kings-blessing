@@ -66,11 +66,14 @@ const SelectionCircle = styled(Circle, { shouldForwardProp: (prop) => prop !== "
   border-radius: 100px;
   height: 15px;
   width: 15px;
+  box-shadow: ${(p) => (p.active ? colors.purple : "transparent")} 0px 0px 3px 1px;
+  transition: all 200ms;
 `;
 
 const PlayCircleWrapper = styled.div`
   display: flex;
-  width: 100%;
+  flex: 1 1 auto;
+  justify-content: center;
 `;
 
 const PlayBlock = styled.div`
@@ -78,9 +81,8 @@ const PlayBlock = styled.div`
   flex: 0 0 ${100 / 7}%;
   border: solid 1px black;
   flex-direction: column;
-  align-items: center;
   justify-content: space-between;
-  padding: 5px 15px;
+  padding: 5px;
 `;
 
 const SelectionWrapper = styled.div`
