@@ -6,7 +6,7 @@ export const colors = {
   darkRed: "#881d11",
   darkBlue: "#1b6698",
   mutedPurple: "#8d728b",
-  purple: "hsl(261, 60%, 39%)",
+  purple: "#8D71C1",
   orange: "#ffa500",
   lightOrange: "#ffdb9a",
   white: "#FFF",

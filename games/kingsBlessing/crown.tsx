@@ -21,10 +21,11 @@ export const Crown: FC<{ owner: Owner }> = ({ owner }) => {
   const playerColor = owner === Owner.P1 ? colors.orange : colors.blue;
   const usedColor = owner === Owner.UNOWNED ? colors.purple : playerColor;
   const usedDarkColor = darken(0.3, usedColor);
+  const linearDefinition = `_linear_4_${usedColor}`;
 
   return (
     <CrownSection>
-      <svg strokeLinejoin="round" strokeMiterlimit="2" clipRule="evenodd" viewBox="0 0 77 61">
+      <svg className={usedColor} strokeLinejoin="round" strokeMiterlimit="2" clipRule="evenodd" viewBox="0 0 77 61">
         <g transform="translate(-673.993 -722.578) matrix(1 0 0 2.50042 -163.708 471.98) matrix(.13544 0 0 .05417 819.335 39.413)">
           <path
             fill="url(#_Linear1)"
@@ -35,7 +36,7 @@ export const Crown: FC<{ owner: Owner }> = ({ owner }) => {
           <path fill="url(#_Linear2)" d="M414.7 1161.1H427.59999999999997V1245.6999999999998H414.7z" />
           <circle cx="421.1" cy="1245.7" r="36.8" fill="url(#_Radial3)" />
           <path
-            fill="url(#_Linear4)"
+            fill={`url(#${linearDefinition})`}
             fillRule="nonzero"
             d="M658.8 1388c0 74.7-108.3 86.6-241.9 86.6-133.6 0-241.9-11.9-241.9-86.6 0-74.7 108.3-135.3 241.9-135.3 133.6 0 241.9 60.5 241.9 135.3z"
           />
@@ -131,7 +132,7 @@ export const Crown: FC<{ owner: Owner }> = ({ owner }) => {
             <stop offset="1" stopColor="#986412" />
           </radialGradient>
           <linearGradient
-            id="_Linear4"
+            id={linearDefinition}
             x1="0"
             x2="1"
             y1="0"
