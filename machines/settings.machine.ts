@@ -1,6 +1,5 @@
 import "tailwindcss/tailwind.css";
-import { createMachine, send } from "xstate";
-import { assign } from "@xstate/immer";
+import { createMachine, send, actions } from "xstate";
 import { MachineEvent } from "../types";
 
 type SettingsContext = Record<BooleanLocalStorageKeys, boolean>;
@@ -36,8 +35,10 @@ export const SettingsMachine = createMachine<SettingsContext, Events>({
       on: {
         LOAD_SETTINGS: {
           target: "ready",
-          actions: assign((ctx) => {
-            ctx[BooleanLocalStorageKeys.tabletop] = getBooleanSetting(BooleanLocalStorageKeys.tabletop);
+          actions: actions.assign(() => {
+            return {
+              [BooleanLocalStorageKeys.tabletop]: getBooleanSetting(BooleanLocalStorageKeys.tabletop),
+            };
           }),
         },
       },

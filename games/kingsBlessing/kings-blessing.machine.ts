@@ -4,9 +4,9 @@ import { SpawnedPlayerMachine, kingsBlessingActor } from "./player.machine";
 
 import UIFx from "uifx";
 import { FieldType, Owner, Player, fieldPresentationOrder } from "./types";
-import { ActionMeta, MachineEvent } from "../../types";
 import { inspect } from "@xstate/inspect";
-import { assign } from "@xstate/immer";
+import type { ActionMeta, MachineEvent } from "../../types";
+
 
 if (typeof window !== "undefined" && localStorage.getItem("development") === "true") {
   inspect({
@@ -80,9 +80,10 @@ type RunGameEvent = MachineEvent<"RUN">;
 type NewGameEvent = MachineEvent<"NEW_GAME">;
 type ResumeGameEvent = MachineEvent<"RESUME_GAME">;
 
+export type ChildToParentEvents = EndTurnEvent;
 export type ExternalEvents = NewGameEvent | ResumeGameEvent;
-type InternalEvents = EndTurnEvent | RunGameEvent;
-export type Events = ExternalEvents | InternalEvents;
+type InternalEvents = RunGameEvent;
+export type Events = ExternalEvents | InternalEvents | ChildToParentEvents;
 
 export type MachineDef = State<Context, Events, StateSchema, Typestate>;
 export type SendFunc = (event: ExternalEvents) => any;
@@ -135,7 +136,7 @@ const killPlayerMachines = (ctx: Context, _event: NewGameEvent) => {
   ctx[Player.P2]?.stop?.();
 };
 
-const claimNewFields = assign<Context, EndTurnEvent>((ctx, event, { state }) => {
+const claimNewFields = actions.assign<Context, EndTurnEvent>((ctx, event, { state }) => {
   const owner = state?.matches("playing.P1") ? Owner.P1 : Owner.P2;
   const unclaimedFields = fieldPresentationOrder.filter((field) => ctx.claimedFields[field] === Owner.UNOWNED);
   const newlyClaimedFields = unclaimedFields.filter((field) => event.completedFields.includes(field));
@@ -143,7 +144,9 @@ const claimNewFields = assign<Context, EndTurnEvent>((ctx, event, { state }) => 
   newlyClaimedFields.forEach((field) => {
     ctx.claimedFields[field] = owner;
   });
-  return;
+  return {
+    claimedFields: { ...ctx.claimedFields },
+  };
 });
 
 type SaveStructure = { claimedFields: Context["claimedFields"]; player: Player };
@@ -160,13 +163,15 @@ const getSavedState = (): SaveStructure | undefined => {
   if (stringSavedFile) return JSON.parse(stringSavedFile);
 };
 
-const loadMachineState = assign<Context, ResumeGameEvent>((ctx) => {
+const loadMachineState = actions.assign<Context, ResumeGameEvent>((ctx): Context => {
   const saveFile = getSavedState();
   if (!saveFile) {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     throw new Error("Failed to load previous game");
   }
   ctx.claimedFields = saveFile.claimedFields;
+
+  return { claimedFields: saveFile.claimedFields };
 });
 
 const previousGameExists = (_ctx: Context, _event: RunGameEvent): boolean => {

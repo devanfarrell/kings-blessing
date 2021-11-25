@@ -1,5 +1,4 @@
 import { createMachine, MachineConfig, ActorRefWithDeprecatedState, State, actions } from "xstate";
-import { assign } from "@xstate/immer";
 import { add, compare, fraction, MathType, number } from "mathjs";
 
 import {
@@ -14,8 +13,8 @@ import {
   fieldPresentationOrder,
   Player,
 } from "./types";
+import type { ChildToParentEvents } from "./kings-blessing.machine";
 import type { MachineEvent } from "../../types";
-import type { EndTurnEvent } from "./kings-blessing.machine";
 
 type PlayerContext = {
   fields: Fields;
@@ -112,15 +111,7 @@ const rollGoldDie = (): GoldDie => {
   return goldDie[randomIndex];
 };
 
-const assignDice = (ctx: PlayerContext, goldDie: GoldDie, purpleDie: PurpleDie): void => {
-  const [numerator, denominator] = goldDie < purpleDie ? [goldDie, purpleDie] : [purpleDie, goldDie];
-  ctx.turnData.goldDie = goldDie;
-  ctx.turnData.purpleDie = purpleDie;
-  ctx.turnData.numerator = numerator;
-  ctx.turnData.denominator = denominator;
-};
-
-const sendParentEndTurn = actions.sendParent<PlayerContext, MachineEvent<"SUBMIT">, EndTurnEvent>((ctx) => {
+const sendParentEndTurn = actions.sendParent<PlayerContext, MachineEvent<"SUBMIT">, ChildToParentEvents>((ctx) => {
   const completedFields = fieldPresentationOrder.filter((key) => fieldComplete(ctx.fields[key]));
   return {
     type: "END_TURN",
@@ -161,20 +152,22 @@ const canRerollGoldDie = (ctx: PlayerContext) => ctx.turnData.canRerollGoldDie;
  * Named actions
  */
 
-const finalizeAnswers = assign((ctx: PlayerContext, _event: any) => {
+const finalizeAnswers = actions.assign((ctx: PlayerContext, _event: MachineEvent<"SUBMIT">) => {
   extendedFields.forEach((key) => {
     ctx.fields[key] = ctx.fields[key].map((circle) =>
       circle.map((selection) => (selection === Selection.SELECTED ? Selection.FINALIZED : selection))
     );
   });
+  return { fields: { ...ctx.fields } };
 });
 
-const clearAnswers = assign((ctx: PlayerContext, _event: any) => {
+const clearAnswers = actions.assign((ctx: PlayerContext, _event: MachineEvent<"SUBMIT">) => {
   extendedFields.forEach((key) => {
     ctx.fields[key] = ctx.fields[key].map((circle) =>
       circle.map((selection) => (selection === Selection.SELECTED ? Selection.UNSELECTED : selection))
     );
   });
+  return { fields: { ...ctx.fields } };
 });
 
 const LOCAL_STORAGE_KEY = (player: Player) => `KINGS_BLESSING/${player}`;
@@ -182,17 +175,98 @@ const saveContext = (ctx: PlayerContext, _event: any) => {
   localStorage.setItem(LOCAL_STORAGE_KEY(ctx.player), JSON.stringify(ctx));
 };
 
-const loadContext = assign<PlayerContext, LoadEvent>((ctx) => {
+const loadContext = actions.assign<PlayerContext, LoadEvent>((ctx): PlayerContext => {
   const stringState = localStorage.getItem(LOCAL_STORAGE_KEY(ctx.player));
   if (stringState) {
     const state: PlayerContext = JSON.parse(stringState);
-    ctx.fields = state.fields;
-    ctx.turnData = state.turnData;
-    return state;
+    return { fields: state.fields, turnData: state.turnData, player: ctx.player };
+  }
+
+  return { fields: resetFields(), turnData: getInitialTurnData(), player: ctx.player };
+});
+
+const identifyFraction = (goldDie: GoldDie, purpleDie: PurpleDie) => {
+  const [numerator, denominator] = goldDie < purpleDie ? [goldDie, purpleDie] : [purpleDie, goldDie];
+  return { numerator, denominator };
+};
+
+const rollBothDice = () => {
+  const purpleDie = rollPurpleDie();
+  const goldDie = rollGoldDie();
+  return { purpleDie, goldDie, ...identifyFraction(goldDie, purpleDie) };
+};
+
+const initialDiceRoll = actions.assign((ctx: PlayerContext, _event: MachineEvent<"ROLL_DICE">) => {
+  const { purpleDie, goldDie, numerator, denominator } = rollBothDice();
+
+  const turnData: TurnData = {
+    numerator,
+    denominator,
+    purpleDie,
+    goldDie,
+    purpleDieSelected: false,
+    goldDieSelected: false,
+    canRerollGoldDie: fieldComplete(ctx.fields.king),
+    canRerollPurpleDie: fieldComplete(ctx.fields.queen),
+  };
+  return {
+    turnData,
+  };
+});
+
+const rerollDice = actions.assign((ctx: PlayerContext, _event: MachineEvent<"ROLL_DICE">) => {
+  const { purpleDieSelected, goldDieSelected } = ctx.turnData;
+
+  if (purpleDieSelected && goldDieSelected) {
+    const { numerator, denominator, goldDie, purpleDie } = rollBothDice();
+
+    const turnData: TurnData = {
+      numerator,
+      denominator,
+      purpleDie,
+      goldDie,
+      purpleDieSelected: false,
+      goldDieSelected: false,
+      canRerollGoldDie: false,
+      canRerollPurpleDie: false,
+    };
+    return {
+      turnData,
+    };
+  } else if (purpleDieSelected) {
+    const { goldDie } = ctx.turnData;
+    const purpleDie = rollPurpleDie();
+    const turnData: TurnData = {
+      ...identifyFraction(goldDie, purpleDie),
+      purpleDie,
+      goldDie,
+      purpleDieSelected: false,
+      goldDieSelected: false,
+      canRerollGoldDie: false,
+      canRerollPurpleDie: false,
+    };
+    return {
+      turnData,
+    };
+  } else {
+    const { purpleDie } = ctx.turnData;
+    const goldDie = rollGoldDie();
+    const turnData: TurnData = {
+      ...identifyFraction(goldDie, purpleDie),
+      purpleDie,
+      goldDie,
+      purpleDieSelected: false,
+      goldDieSelected: false,
+      canRerollGoldDie: false,
+      canRerollPurpleDie: false,
+    };
+    return {
+      turnData,
+    };
   }
 });
 
-const resetTurnData = assign<PlayerContext, SubmitEvent>((ctx) => (ctx.turnData = getInitialTurnData(ctx)));
+const resetTurnData = actions.assign<PlayerContext, SubmitEvent>((ctx) => ({ turnData: getInitialTurnData(ctx) }));
 
 const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateSchema, Events> = {
   id: "PLAYER_MACHINE",
@@ -218,25 +292,14 @@ const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateS
       on: {
         ROLL_DICE: {
           target: "takingTurn",
-          actions: [
-            assign((ctx, _event, state) => {
-              const purpleDie = rollPurpleDie();
-              const goldDie = rollGoldDie();
-              assignDice(ctx, goldDie, purpleDie);
-              ctx.turnData.canRerollGoldDie = fieldComplete(ctx.fields.king);
-              ctx.turnData.canRerollPurpleDie = fieldComplete(ctx.fields.queen);
-              ctx.turnData.purpleDieSelected = false;
-              ctx.turnData.goldDieSelected = false;
-            }),
-            saveContext,
-          ],
+          actions: [initialDiceRoll, saveContext],
         },
       },
     },
     takingTurn: {
       on: {
         TOGGLE_SLICE: {
-          actions: assign((ctx, event) => {
+          actions: actions.assign((ctx, event) => {
             const { field, circleIndex, cellIndex } = event;
             const { fields } = ctx;
             const currentState = fields[field][circleIndex][cellIndex];
@@ -244,6 +307,13 @@ const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateS
               fields[field][circleIndex][cellIndex] =
                 currentState === Selection.SELECTED ? Selection.UNSELECTED : Selection.SELECTED;
             }
+
+            return {
+              fields: {
+                ...fields,
+                [field]: fields[field].map((circle, i) => (i !== circleIndex ? circle : [...circle])),
+              },
+            };
           }),
           cond: (ctx, { field, circleIndex, cellIndex }) => {
             const currentSelectionState = ctx.fields[field][circleIndex][cellIndex];
@@ -251,36 +321,19 @@ const kingsBlessingActorConfig: MachineConfig<PlayerContext, PlayerMachineStateS
           },
         },
         TOGGLE_PURPLE_DIE_SELECTION: {
-          actions: assign((ctx) => {
-            ctx.turnData.purpleDieSelected = !ctx.turnData.purpleDieSelected;
-          }),
+          actions: actions.assign((ctx) => ({
+            turnData: { ...ctx.turnData, purpleDieSelected: !ctx.turnData.purpleDieSelected },
+          })),
           cond: canRerollPurpleDie,
         },
         TOGGLE_GOLD_DIE_SELECTION: {
-          actions: assign((ctx) => {
-            ctx.turnData.goldDieSelected = !ctx.turnData.goldDieSelected;
-          }),
+          actions: actions.assign((ctx) => ({
+            turnData: { ...ctx.turnData, goldDieSelected: !ctx.turnData.goldDieSelected },
+          })),
           cond: canRerollGoldDie,
         },
         ROLL_DICE: {
-          actions: [
-            assign((ctx) => {
-              let goldDie = ctx.turnData.goldDie;
-              let purpleDie = ctx.turnData.purpleDie;
-              if (ctx.turnData.goldDieSelected) {
-                goldDie = rollGoldDie();
-                ctx.turnData.canRerollGoldDie = false;
-                ctx.turnData.goldDieSelected = false;
-              }
-              if (ctx.turnData.purpleDieSelected) {
-                purpleDie = rollPurpleDie();
-                ctx.turnData.canRerollPurpleDie = false;
-                ctx.turnData.purpleDieSelected = false;
-              }
-              assignDice(ctx, goldDie, purpleDie);
-            }),
-            saveContext,
-          ],
+          actions: [rerollDice, saveContext],
         },
         SUBMIT: [
           {
